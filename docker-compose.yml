@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jobo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jobo
+    ports:
+      - "5434:5432"
+    volumes:
+      - jobo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  jobo_postgres_data:

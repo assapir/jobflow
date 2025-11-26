@@ -1,0 +1,54 @@
+{
+  "app": {
+    "title": "Jobo",
+    "subtitle": "Job Search Manager"
+  },
+  "stages": {
+    "wishlist": "Wishlist",
+    "applied": "Applied",
+    "phone_screen": "Phone Screen",
+    "interview": "Interview",
+    "offer": "Offer",
+    "rejected": "Rejected"
+  },
+  "job": {
+    "company": "Company",
+    "position": "Position",
+    "location": "Location",
+    "salary": "Salary",
+    "linkedinUrl": "LinkedIn URL",
+    "description": "Description",
+    "notes": "Notes",
+    "appliedAt": "Applied Date",
+    "createdAt": "Created",
+    "updatedAt": "Updated"
+  },
+  "actions": {
+    "add": "Add Job",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "messages": {
+    "jobAdded": "Job added successfully",
+    "jobUpdated": "Job updated successfully",
+    "jobDeleted": "Job deleted successfully",
+    "errorLoading": "Failed to load jobs",
+    "errorSaving": "Failed to save job",
+    "confirmDelete": "Are you sure you want to delete this job application?"
+  },
+  "empty": {
+    "noJobs": "No jobs in this stage",
+    "dropHere": "Drop a job here"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "toggle": "Change language",
+    "en": "English",
+    "he": "Hebrew"
+  }
+}

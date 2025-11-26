@@ -1,0 +1,54 @@
+{
+  "app": {
+    "title": "ג'ובו",
+    "subtitle": "מנהל חיפוש עבודה"
+  },
+  "stages": {
+    "wishlist": "רשימת משאלות",
+    "applied": "הוגש",
+    "phone_screen": "שיחת טלפון",
+    "interview": "ראיון",
+    "offer": "הצעה",
+    "rejected": "נדחה"
+  },
+  "job": {
+    "company": "חברה",
+    "position": "תפקיד",
+    "location": "מיקום",
+    "salary": "שכר",
+    "linkedinUrl": "קישור לינקדאין",
+    "description": "תיאור",
+    "notes": "הערות",
+    "appliedAt": "תאריך הגשה",
+    "createdAt": "נוצר",
+    "updatedAt": "עודכן"
+  },
+  "actions": {
+    "add": "הוסף משרה",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "save": "שמור",
+    "cancel": "ביטול",
+    "confirm": "אישור"
+  },
+  "messages": {
+    "jobAdded": "המשרה נוספה בהצלחה",
+    "jobUpdated": "המשרה עודכנה בהצלחה",
+    "jobDeleted": "המשרה נמחקה בהצלחה",
+    "errorLoading": "שגיאה בטעינת משרות",
+    "errorSaving": "שגיאה בשמירת משרה",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק את המשרה הזו?"
+  },
+  "empty": {
+    "noJobs": "אין משרות בשלב זה",
+    "dropHere": "שחרר משרה כאן"
+  },
+  "theme": {
+    "toggle": "החלף ערכת נושא"
+  },
+  "language": {
+    "toggle": "שנה שפה",
+    "en": "אנגלית",
+    "he": "עברית"
+  }
+}
