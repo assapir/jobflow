@@ -1,4 +1,10 @@
-export type Stage = 'wishlist' | 'applied' | 'phone_screen' | 'interview' | 'offer' | 'rejected';
+export type Stage =
+  | "wishlist"
+  | "applied"
+  | "phone_screen"
+  | "interview"
+  | "offer"
+  | "rejected";
 
 export interface JobApplication {
   id: string;
@@ -38,4 +44,26 @@ export interface ReorderInput {
   }>;
 }
 
-export const STAGES: Stage[] = ['wishlist', 'applied', 'phone_screen', 'interview', 'offer', 'rejected'];
+export const STAGES: Stage[] = [
+  "wishlist",
+  "applied",
+  "phone_screen",
+  "interview",
+  "offer",
+  "rejected",
+];
+
+// LinkedIn job search result
+export interface LinkedInJob {
+  title: string;
+  company: string;
+  location: string;
+  url: string;
+  postedDate?: string;
+}
+
+export interface LinkedInSearchResponse {
+  success: boolean;
+  jobs: LinkedInJob[];
+  totalResults: number;
+}

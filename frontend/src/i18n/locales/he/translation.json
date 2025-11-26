@@ -29,7 +29,8 @@
     "delete": "מחק",
     "save": "שמור",
     "cancel": "ביטול",
-    "confirm": "אישור"
+    "confirm": "אישור",
+    "searchLinkedIn": "חפש בלינקדאין"
   },
   "messages": {
     "jobAdded": "המשרה נוספה בהצלחה",
@@ -50,5 +51,23 @@
     "toggle": "שנה שפה",
     "en": "אנגלית",
     "he": "עברית"
+  },
+  "linkedin": {
+    "searchTitle": "חיפוש משרות בלינקדאין",
+    "keywords": "מילות חיפוש",
+    "keywordsPlaceholder": "מהנדס תוכנה, מנהל מוצר...",
+    "location": "מיקום",
+    "locationPlaceholder": "תל אביב, מרחוק...",
+    "search": "חפש",
+    "searching": "מחפש בלינקדאין...",
+    "resultsCount": "נמצאו {{count}} משרות",
+    "selectAll": "בחר הכל",
+    "deselectAll": "בטל בחירה",
+    "importSelected": "ייבא {{count}} נבחרות",
+    "viewOnLinkedIn": "צפה בלינקדאין",
+    "noResults": "לא נמצאו משרות. נסה מילות חיפוש או מיקום אחר.",
+    "searchError": "שגיאה בחיפוש בלינקדאין. נסה שוב.",
+    "importError": "שגיאה בייבוא משרות. נסה שוב.",
+    "rateLimited": "יותר מדי בקשות. המתן {{seconds}} שניות."
   }
 }

@@ -27,3 +27,6 @@ coverage/
 
 # Drizzle
 drizzle/*.sql
+
+# Crawlee storage
+storage/

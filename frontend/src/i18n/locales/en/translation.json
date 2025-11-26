@@ -29,7 +29,8 @@
     "delete": "Delete",
     "save": "Save",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "searchLinkedIn": "Search LinkedIn"
   },
   "messages": {
     "jobAdded": "Job added successfully",
@@ -50,5 +51,23 @@
     "toggle": "Change language",
     "en": "English",
     "he": "Hebrew"
+  },
+  "linkedin": {
+    "searchTitle": "Search LinkedIn Jobs",
+    "keywords": "Keywords",
+    "keywordsPlaceholder": "Software Engineer, Product Manager...",
+    "location": "Location",
+    "locationPlaceholder": "San Francisco, Remote...",
+    "search": "Search",
+    "searching": "Searching LinkedIn...",
+    "resultsCount": "{{count}} jobs found",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "importSelected": "Import {{count}} Selected",
+    "viewOnLinkedIn": "View on LinkedIn",
+    "noResults": "No jobs found. Try different keywords or location.",
+    "searchError": "Failed to search LinkedIn. Please try again.",
+    "importError": "Failed to import jobs. Please try again.",
+    "rateLimited": "Too many requests. Please wait {{seconds}} seconds."
   }
 }

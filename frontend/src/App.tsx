@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, LoadingOverlay, Center, Text, Stack, Button, useMantineColorScheme, useDirection } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useJobs } from './hooks/useJobs';
-import { Header, KanbanBoard, JobFormModal, DeleteConfirmModal } from './components';
+import { Header, KanbanBoard, JobFormModal, DeleteConfirmModal, LinkedInSearchModal } from './components';
 import type { JobApplication, CreateJobInput } from './types/job';
 
 export default function App() {
@@ -33,6 +33,7 @@ export default function App() {
 
   const [formModalOpened, { open: openFormModal, close: closeFormModal }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [linkedInModalOpened, { open: openLinkedInModal, close: closeLinkedInModal }] = useDisclosure(false);
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null);
 
   const handleAddJob = () => {
@@ -66,6 +67,12 @@ export default function App() {
     }
   };
 
+  const handleLinkedInImport = async (jobs: CreateJobInput[]) => {
+    for (const job of jobs) {
+      await addJob(job);
+    }
+  };
+
   const bgColor = colorScheme === 'dark' ? '#0a0a0f' : '#f8f9fa';
   const bgGradient = colorScheme === 'dark'
     ? 'linear-gradient(180deg, #0a0a0f 0%, #0f0f18 50%, #0a0a0f 100%)'
@@ -74,7 +81,7 @@ export default function App() {
   if (error && jobs.length === 0) {
     return (
       <Box style={{ minHeight: '100vh', background: bgColor }}>
-        <Header onAddJob={handleAddJob} />
+        <Header onAddJob={handleAddJob} onSearchLinkedIn={openLinkedInModal} />
         <Center style={{ height: 'calc(100vh - 80px)' }}>
           <Stack align="center" gap="md">
             <Text c="red" size="lg">Failed to load jobs</Text>
@@ -102,7 +109,7 @@ export default function App() {
         loaderProps={{ color: 'cyan', type: 'bars' }}
       />
 
-      <Header onAddJob={handleAddJob} />
+      <Header onAddJob={handleAddJob} onSearchLinkedIn={openLinkedInModal} />
 
       <Box p="md">
         <KanbanBoard
@@ -127,6 +134,12 @@ export default function App() {
         onClose={closeDeleteModal}
         onConfirm={handleConfirmDelete}
         job={selectedJob}
+      />
+
+      <LinkedInSearchModal
+        opened={linkedInModalOpened}
+        onClose={closeLinkedInModal}
+        onImport={handleLinkedInImport}
       />
     </Box>
   );

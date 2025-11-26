@@ -5,3 +5,4 @@ export { KanbanAccordionItem } from './KanbanAccordionItem';
 export { JobCard } from './JobCard';
 export { JobFormModal } from './JobFormModal';
 export { DeleteConfirmModal } from './DeleteConfirmModal';
+export { LinkedInSearchModal } from './LinkedInSearchModal';

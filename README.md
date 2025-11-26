@@ -21,11 +21,13 @@ A modern job search management application with a Trello-style kanban board to t
 - **Drizzle ORM** - Lightweight, type-safe ORM
 - **PostgreSQL** - Database
 - **Zod** - Schema validation
+- **Crawlee + Playwright** - Web scraping for LinkedIn job search
 
 ## Features
 
 - 📋 **Kanban Board** - 6 columns: Wishlist, Applied, Phone Screen, Interview, Offer, Rejected
 - 🖱️ **Drag & Drop** - Easily move jobs between stages
+- 🔍 **LinkedIn Job Search** - Search and import jobs directly from LinkedIn
 - 🌙 **Dark/Light Theme** - Beautiful glassmorphism design
 - 🌐 **i18n Support** - English and Hebrew languages
 - 📱 **Responsive** - Works on all screen sizes
@@ -84,9 +86,13 @@ jobo/
 │   │   │   ├── schema.ts      # Drizzle schema
 │   │   │   └── index.ts       # DB connection
 │   │   ├── routes/
-│   │   │   └── jobs.ts        # Job routes
+│   │   │   ├── jobs.ts        # Job routes
+│   │   │   └── linkedin.ts    # LinkedIn search routes
 │   │   ├── controllers/
-│   │   │   └── jobs.ts        # Job controllers
+│   │   │   ├── jobs.ts        # Job controllers
+│   │   │   └── linkedin.ts    # LinkedIn search controller
+│   │   ├── services/
+│   │   │   └── linkedinScraper.ts  # LinkedIn scraper service
 │   │   └── index.ts           # Express app
 │   ├── drizzle/               # Migrations
 │   ├── drizzle.config.ts
@@ -107,6 +113,8 @@ jobo/
 
 ## API Endpoints
 
+### Jobs
+
 | Method | Endpoint              | Description                |
 | ------ | --------------------- | -------------------------- |
 | GET    | `/api/jobs`           | Get all job applications   |
@@ -116,6 +124,13 @@ jobo/
 | DELETE | `/api/jobs/:id`       | Delete job application     |
 | PATCH  | `/api/jobs/:id/stage` | Update job stage           |
 | PATCH  | `/api/jobs/reorder`   | Reorder jobs (drag-drop)   |
+
+### LinkedIn Search
+
+| Method | Endpoint                    | Description                          |
+| ------ | --------------------------- | ------------------------------------ |
+| GET    | `/api/linkedin/search`      | Search LinkedIn jobs (q, location)   |
+| POST   | `/api/linkedin/cache/clear` | Clear the search results cache       |
 
 ## Development
 
