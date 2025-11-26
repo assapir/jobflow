@@ -1,12 +1,23 @@
-import { useState } from 'react';
-import { Box, LoadingOverlay, Center, Text, Stack, Button, useMantineColorScheme } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, LoadingOverlay, Center, Text, Stack, Button, useMantineColorScheme, useDirection } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useJobs } from './hooks/useJobs';
 import { Header, KanbanBoard, JobFormModal, DeleteConfirmModal } from './components';
 import type { JobApplication, CreateJobInput } from './types/job';
 
 export default function App() {
+  const { i18n } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
+  const { setDirection } = useDirection();
+
+  // Sync RTL direction with language
+  useEffect(() => {
+    const isRTL = i18n.language === 'he';
+    setDirection(isRTL ? 'rtl' : 'ltr');
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+  }, [i18n.language, setDirection]);
+
   const {
     jobs,
     loading,
