@@ -38,3 +38,52 @@ body.is-dragging * {
 [data-rfd-drag-handle-context-id] {
   z-index: 10000 !important;
 }
+
+/* Mobile touch-friendly styles */
+@media (max-width: 768px) {
+  /* Improve touch scrolling */
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Larger touch targets for buttons and interactive elements */
+  button,
+  [role="button"],
+  .mantine-ActionIcon-root {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better touch interaction for draggable items */
+  [data-rfd-draggable-id] {
+    touch-action: manipulation;
+  }
+
+  /* Prevent long-press context menu on drag handles */
+  [data-rfd-drag-handle-draggable-id] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Larger tap targets for menu items */
+  .mantine-Menu-item {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  /* Better accordion touch targets */
+  .mantine-Accordion-control {
+    min-height: 52px;
+  }
+
+  /* Prevent pull-to-refresh interfering with drag */
+  body.is-dragging {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Increase spacing for touch-friendly card interactions */
+  .mantine-Card-root {
+    margin-bottom: 12px;
+  }
+}

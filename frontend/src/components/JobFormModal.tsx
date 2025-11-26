@@ -10,6 +10,7 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import type { JobApplication, CreateJobInput } from "../types/job";
 import { STAGES } from "../types/job";
@@ -29,6 +30,7 @@ export function JobFormModal({
 }: JobFormModalProps) {
   const { t } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const form = useForm<CreateJobInput>({
     initialValues: {
@@ -105,6 +107,7 @@ export function JobFormModal({
       onClose={onClose}
       title={job ? t("actions.edit") : t("actions.add")}
       size="lg"
+      fullScreen={isMobile}
       styles={{
         header: {
           background: modalHeaderBg,
@@ -131,19 +134,33 @@ export function JobFormModal({
             {...form.getInputProps("position")}
           />
 
-          <Group grow>
-            <TextInput
-              label={t("job.location")}
-              placeholder="San Francisco, CA"
-              {...form.getInputProps("location")}
-            />
-
-            <TextInput
-              label={t("job.salary")}
-              placeholder="$150,000 - $200,000"
-              {...form.getInputProps("salary")}
-            />
-          </Group>
+          {isMobile ? (
+            <>
+              <TextInput
+                label={t("job.location")}
+                placeholder="San Francisco, CA"
+                {...form.getInputProps("location")}
+              />
+              <TextInput
+                label={t("job.salary")}
+                placeholder="$150,000 - $200,000"
+                {...form.getInputProps("salary")}
+              />
+            </>
+          ) : (
+            <Group grow>
+              <TextInput
+                label={t("job.location")}
+                placeholder="San Francisco, CA"
+                {...form.getInputProps("location")}
+              />
+              <TextInput
+                label={t("job.salary")}
+                placeholder="$150,000 - $200,000"
+                {...form.getInputProps("salary")}
+              />
+            </Group>
+          )}
 
           <TextInput
             label={t("job.linkedinUrl")}

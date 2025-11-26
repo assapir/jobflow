@@ -1,4 +1,5 @@
-import { Group, Title, Button, ActionIcon, useMantineColorScheme, Menu, Text, Box } from '@mantine/core';
+import { Group, Title, Button, ActionIcon, useMantineColorScheme, Menu, Text, Box, Tooltip } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
@@ -8,6 +9,7 @@ interface HeaderProps {
 export function Header({ onAddJob }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -54,19 +56,36 @@ export function Header({ onAddJob }: HeaderProps) {
         </Group>
 
         <Group gap="sm">
-          <Button
-            onClick={onAddJob}
-            variant="gradient"
-            gradient={{ from: 'cyan', to: 'teal', deg: 135 }}
-            leftSection={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            }
-          >
-            {t('actions.add')}
-          </Button>
+          {isMobile ? (
+            <Tooltip label={t('actions.add')}>
+              <ActionIcon
+                onClick={onAddJob}
+                variant="gradient"
+                gradient={{ from: 'cyan', to: 'teal', deg: 135 }}
+                size="lg"
+                aria-label={t('actions.add')}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </ActionIcon>
+            </Tooltip>
+          ) : (
+            <Button
+              onClick={onAddJob}
+              variant="gradient"
+              gradient={{ from: 'cyan', to: 'teal', deg: 135 }}
+              leftSection={
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              }
+            >
+              {t('actions.add')}
+            </Button>
+          )}
 
           <Menu shadow="md" width={140} position="bottom-end">
             <Menu.Target>

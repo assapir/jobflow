@@ -1,14 +1,18 @@
-import { Group, Box } from '@mantine/core';
-import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import type { JobApplication, Stage } from '../types/job';
-import { STAGES } from '../types/job';
-import { KanbanColumn } from './KanbanColumn';
+import { Group, Box, Accordion, useMantineColorScheme } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
+import type { JobApplication, Stage } from "../types/job";
+import { STAGES } from "../types/job";
+import { KanbanColumn } from "./KanbanColumn";
+import { KanbanAccordionItem } from "./KanbanAccordionItem";
 
 interface KanbanBoardProps {
   jobs: JobApplication[];
   getJobsByStage: (stage: Stage) => JobApplication[];
   onMoveJob: (jobId: string, newStage: Stage, newOrder: number) => void;
-  onReorderJobs: (updates: Array<{ id: string; stage: Stage; order: number }>) => void;
+  onReorderJobs: (
+    updates: Array<{ id: string; stage: Stage; order: number }>
+  ) => void;
   onEditJob: (job: JobApplication) => void;
   onDeleteJob: (job: JobApplication) => void;
 }
@@ -20,12 +24,15 @@ export function KanbanBoard({
   onEditJob,
   onDeleteJob,
 }: KanbanBoardProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const { colorScheme } = useMantineColorScheme();
+
   const handleDragStart = () => {
-    document.body.classList.add('is-dragging');
+    document.body.classList.add("is-dragging");
   };
 
   const handleDragEnd = (result: DropResult) => {
-    document.body.classList.remove('is-dragging');
+    document.body.classList.remove("is-dragging");
     const { destination, source, draggableId } = result;
 
     // Dropped outside a droppable area
@@ -67,7 +74,10 @@ export function KanbanBoard({
       if (!movedJob) return;
 
       const newDestJobs = Array.from(destJobs);
-      newDestJobs.splice(destination.index, 0, { ...movedJob, stage: destStage });
+      newDestJobs.splice(destination.index, 0, {
+        ...movedJob,
+        stage: destStage,
+      });
 
       const updates = [
         ...newSourceJobs.map((job, index) => ({
@@ -88,11 +98,58 @@ export function KanbanBoard({
     }
   };
 
+  const accordionBg =
+    colorScheme === "dark"
+      ? "linear-gradient(180deg, rgba(25, 25, 35, 0.95) 0%, rgba(15, 15, 25, 0.98) 100%)"
+      : "linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%)";
+
+  const borderColor =
+    colorScheme === "dark"
+      ? "rgba(255, 255, 255, 0.06)"
+      : "rgba(0, 0, 0, 0.08)";
+
+  if (isMobile) {
+    return (
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <Accordion
+          multiple
+          defaultValue={["wishlist", "applied"]}
+          styles={{
+            root: {
+              background: accordionBg,
+              borderRadius: 12,
+              border: `1px solid ${borderColor}`,
+            },
+            item: {
+              borderColor: borderColor,
+            },
+            control: {
+              padding: "12px 16px",
+            },
+            panel: {
+              padding: "0 8px 8px",
+            },
+          }}
+        >
+          {STAGES.map((stage) => (
+            <KanbanAccordionItem
+              key={stage}
+              stage={stage}
+              jobs={getJobsByStage(stage)}
+              onEditJob={onEditJob}
+              onDeleteJob={onDeleteJob}
+            />
+          ))}
+        </Accordion>
+      </DragDropContext>
+    );
+  }
+
   return (
     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Box
         style={{
-          overflowX: 'auto',
+          overflowX: "auto",
           paddingBottom: 16,
         }}
       >
