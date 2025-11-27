@@ -33,7 +33,7 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
       marginBottom: 12,
       padding: 12,
       borderRadius: 8,
-      cursor: isDragging ? 'grabbing' : 'grab',
+      cursor: isDragging ? 'grabbing' : 'pointer',
       background: isDragging
         ? 'linear-gradient(135deg, rgba(0, 212, 236, 0.25) 0%, rgba(0, 168, 188, 0.25) 100%)'
         : cardBg,
@@ -55,6 +55,7 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           style={getStyle(snapshot.isDragging, provided.draggableProps.style)}
+          onClick={() => onEdit(job)}
         >
           <Stack gap="xs">
             <Group justify="space-between" align="flex-start">
@@ -63,7 +64,7 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
               </Text>
               <Menu shadow="md" width={120} position="bottom-end">
                 <Menu.Target>
-                  <ActionIcon variant="subtle" size="sm" color="gray">
+                  <ActionIcon variant="subtle" size="sm" color="gray" onClick={(e) => e.stopPropagation()}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="1" />
                       <circle cx="12" cy="5" r="1" />
