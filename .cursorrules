@@ -18,4 +18,8 @@ Before committing any changes, ensure all of the following pass:
    - Backend unit tests: `cd backend && npm test`
    - E2E tests: `npm run test:e2e` (requires Docker Compose for PostgreSQL)
 
-Only commit when all linting, formatting, and tests pass successfully.
+4. **Build** - Ensure the project builds without errors
+   - Frontend: `cd frontend && npm run build`
+   - Backend: `cd backend && npm run build`
+
+Only commit when all linting, formatting, tests, and builds pass successfully.
