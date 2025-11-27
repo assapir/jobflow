@@ -9,16 +9,19 @@ export function getAuthHeaders(): HeadersInit {
   const token = getAccessToken?.();
   if (token) {
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     };
   }
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 }
 
-export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+export async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
   const headers = {
     ...getAuthHeaders(),
     ...options.headers,
@@ -27,6 +30,6 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
   return fetch(url, {
     ...options,
     headers,
-    credentials: 'include',
+    credentials: "include",
   });
 }

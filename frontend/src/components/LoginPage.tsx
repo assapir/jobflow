@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -10,8 +10,8 @@ import {
   useMantineColorScheme,
   Alert,
   Divider,
-} from '@mantine/core';
-import { useAuth } from '../context/AuthContext';
+} from "@mantine/core";
+import { useAuth } from "../context/AuthContext";
 
 interface LoginPageProps {
   error?: string | null;
@@ -19,18 +19,19 @@ interface LoginPageProps {
 
 // Login page always displays in English for consistency
 const loginText = {
-  title: 'JobFlow',
-  tagline: 'Where applications flow, offers follow',
-  signInPrompt: 'Sign in to access your job applications',
-  signInWithLinkedIn: 'Sign in with LinkedIn',
-  devLogin: 'Dev Login (Bypass Auth)',
-  privacyNote: 'We only access your basic profile information',
-  linkedInNotConfigured: 'LinkedIn OAuth not configured. Use Dev Login or configure LinkedIn credentials.',
+  title: "JobFlow",
+  tagline: "Where applications flow, offers follow",
+  signInPrompt: "Sign in to access your job applications",
+  signInWithLinkedIn: "Sign in with LinkedIn",
+  devLogin: "Dev Login (Bypass Auth)",
+  privacyNote: "We only access your basic profile information",
+  linkedInNotConfigured:
+    "LinkedIn OAuth not configured. Use Dev Login or configure LinkedIn credentials.",
   errors: {
-    accessDenied: 'You denied access to your LinkedIn account',
-    invalidRequest: 'Invalid authentication request',
-    invalidState: 'Authentication session expired. Please try again.',
-    authFailed: 'Authentication failed. Please try again.',
+    accessDenied: "You denied access to your LinkedIn account",
+    invalidRequest: "Invalid authentication request",
+    invalidState: "Authentication session expired. Please try again.",
+    authFailed: "Authentication failed. Please try again.",
   },
 };
 
@@ -39,20 +40,21 @@ export function LoginPage({ error }: LoginPageProps) {
   const { colorScheme } = useMantineColorScheme();
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const bgGradient = colorScheme === 'dark'
-    ? 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)'
-    : 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%)';
+  const bgGradient =
+    colorScheme === "dark"
+      ? "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)"
+      : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%)";
 
   const handleLogin = async () => {
     try {
       setLoginError(null);
       await login();
     } catch (err) {
-      console.error('Login failed:', err);
-      if (err instanceof Error && err.message === 'LINKEDIN_NOT_CONFIGURED') {
+      console.error("Login failed:", err);
+      if (err instanceof Error && err.message === "LINKEDIN_NOT_CONFIGURED") {
         setLoginError(loginText.linkedInNotConfigured);
       } else {
-        setLoginError('Login failed. Please try again.');
+        setLoginError("Login failed. Please try again.");
       }
     }
   };
@@ -62,20 +64,20 @@ export function LoginPage({ error }: LoginPageProps) {
       setLoginError(null);
       await devLogin();
     } catch (err) {
-      console.error('Dev login failed:', err);
-      setLoginError('Dev login failed. Please try again.');
+      console.error("Dev login failed:", err);
+      setLoginError("Dev login failed. Please try again.");
     }
   };
 
   const getErrorMessage = (errorCode: string | null | undefined) => {
     switch (errorCode) {
-      case 'access_denied':
+      case "access_denied":
         return loginText.errors.accessDenied;
-      case 'invalid_request':
+      case "invalid_request":
         return loginText.errors.invalidRequest;
-      case 'invalid_state':
+      case "invalid_state":
         return loginText.errors.invalidState;
-      case 'auth_failed':
+      case "auth_failed":
         return loginText.errors.authFailed;
       default:
         return null;
@@ -89,11 +91,11 @@ export function LoginPage({ error }: LoginPageProps) {
   return (
     <Box
       style={{
-        minHeight: '100vh',
+        minHeight: "100vh",
         background: bgGradient,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Center>
@@ -103,13 +105,16 @@ export function LoginPage({ error }: LoginPageProps) {
           radius="lg"
           style={{
             maxWidth: 400,
-            width: '100%',
-            background: colorScheme === 'dark' ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
+            width: "100%",
+            background:
+              colorScheme === "dark"
+                ? "rgba(26, 26, 46, 0.9)"
+                : "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(10px)",
           }}
         >
           <Stack align="center" gap="lg">
-            <Box style={{ textAlign: 'center' }}>
+            <Box style={{ textAlign: "center" }}>
               <Title order={1} size="h2" mb="xs">
                 {loginText.title}
               </Title>
@@ -119,12 +124,12 @@ export function LoginPage({ error }: LoginPageProps) {
             </Box>
 
             {errorMessage && (
-              <Alert color="red" variant="light" style={{ width: '100%' }}>
+              <Alert color="red" variant="light" style={{ width: "100%" }}>
                 {errorMessage}
               </Alert>
             )}
 
-            <Stack gap="md" style={{ width: '100%' }}>
+            <Stack gap="md" style={{ width: "100%" }}>
               <Text size="sm" c="dimmed" ta="center">
                 {loginText.signInPrompt}
               </Text>
@@ -148,9 +153,9 @@ export function LoginPage({ error }: LoginPageProps) {
                   }
                   styles={{
                     root: {
-                      backgroundColor: '#0077B5',
-                      '&:hover': {
-                        backgroundColor: '#006097',
+                      backgroundColor: "#0077B5",
+                      "&:hover": {
+                        backgroundColor: "#006097",
                       },
                     },
                   }}
@@ -161,7 +166,9 @@ export function LoginPage({ error }: LoginPageProps) {
 
               {showDevLogin && (
                 <>
-                  {linkedInConfigured && <Divider label="or" labelPosition="center" />}
+                  {linkedInConfigured && (
+                    <Divider label="or" labelPosition="center" />
+                  )}
                   <Button
                     size="lg"
                     fullWidth

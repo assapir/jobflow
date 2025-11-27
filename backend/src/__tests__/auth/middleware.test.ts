@@ -58,7 +58,9 @@ describe("Auth Middleware", () => {
       });
 
       assert.strictEqual(res.getStatus(), 401);
-      assert.deepStrictEqual(res.getData(), { error: "Authentication required" });
+      assert.deepStrictEqual(res.getData(), {
+        error: "Authentication required",
+      });
       assert.strictEqual(nextCalled, false);
     });
 
@@ -74,7 +76,9 @@ describe("Auth Middleware", () => {
       });
 
       assert.strictEqual(res.getStatus(), 401);
-      assert.deepStrictEqual(res.getData(), { error: "Authentication required" });
+      assert.deepStrictEqual(res.getData(), {
+        error: "Authentication required",
+      });
       assert.strictEqual(nextCalled, false);
     });
 
@@ -90,7 +94,9 @@ describe("Auth Middleware", () => {
       });
 
       assert.strictEqual(res.getStatus(), 401);
-      assert.deepStrictEqual(res.getData(), { error: "Invalid or expired token" });
+      assert.deepStrictEqual(res.getData(), {
+        error: "Invalid or expired token",
+      });
       assert.strictEqual(nextCalled, false);
     });
 

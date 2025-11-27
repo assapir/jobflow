@@ -16,5 +16,6 @@ Before committing any changes, ensure all of the following pass:
 3. **Tests** - All tests must pass
    - Frontend unit tests: `cd frontend && npm test`
    - Backend unit tests: `cd backend && npm test`
+   - E2E tests: `npm run test:e2e` (requires Docker Compose for PostgreSQL)
 
 Only commit when all linting, formatting, and tests pass successfully.

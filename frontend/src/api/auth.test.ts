@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mockFetch } from "../test/setup";
-import { getLinkedInAuthUrl, refreshToken, getCurrentUser, logout, getAuthStatus, devLogin } from "./auth";
+import {
+  getLinkedInAuthUrl,
+  refreshToken,
+  getCurrentUser,
+  logout,
+  getAuthStatus,
+  devLogin,
+} from "./auth";
 
 describe("Auth API", () => {
   beforeEach(() => {
@@ -32,7 +39,9 @@ describe("Auth API", () => {
         status: 500,
       });
 
-      await expect(getAuthStatus()).rejects.toThrow("Failed to get auth status");
+      await expect(getAuthStatus()).rejects.toThrow(
+        "Failed to get auth status"
+      );
     });
   });
 
@@ -73,7 +82,8 @@ describe("Auth API", () => {
 
   describe("getLinkedInAuthUrl", () => {
     it("should fetch LinkedIn auth URL", async () => {
-      const mockAuthUrl = "https://www.linkedin.com/oauth/v2/authorization?client_id=test";
+      const mockAuthUrl =
+        "https://www.linkedin.com/oauth/v2/authorization?client_id=test";
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ authUrl: mockAuthUrl }),
@@ -106,7 +116,9 @@ describe("Auth API", () => {
         json: async () => ({ devAuthEnabled: true }),
       });
 
-      await expect(getLinkedInAuthUrl()).rejects.toThrow("LINKEDIN_NOT_CONFIGURED");
+      await expect(getLinkedInAuthUrl()).rejects.toThrow(
+        "LINKEDIN_NOT_CONFIGURED"
+      );
     });
   });
 

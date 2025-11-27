@@ -54,7 +54,9 @@ describe("DeleteConfirmModal", () => {
       />
     );
 
-    expect(screen.queryByText("messages.confirmDelete")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("messages.confirmDelete")
+    ).not.toBeInTheDocument();
   });
 
   it("should display job details when job is provided", () => {

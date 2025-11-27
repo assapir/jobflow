@@ -1,6 +1,6 @@
 # JobFlow - Job Search Manager
 
-> *Where applications flow, offers follow*
+> _Where applications flow, offers follow_
 
 A modern job search management application with a Trello-style kanban board to track your job applications.
 
@@ -129,10 +129,10 @@ jobflow/
 
 ### LinkedIn Search
 
-| Method | Endpoint                    | Description                          |
-| ------ | --------------------------- | ------------------------------------ |
-| GET    | `/api/linkedin/search`      | Search LinkedIn jobs (q, location)   |
-| POST   | `/api/linkedin/cache/clear` | Clear the search results cache       |
+| Method | Endpoint                    | Description                        |
+| ------ | --------------------------- | ---------------------------------- |
+| GET    | `/api/linkedin/search`      | Search LinkedIn jobs (q, location) |
+| POST   | `/api/linkedin/cache/clear` | Clear the search results cache     |
 
 ## Development
 

@@ -1,6 +1,20 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { User } from '../types/user';
-import { getLinkedInAuthUrl, refreshToken, logout as apiLogout, getAuthStatus, devLogin as apiDevLogin, type AuthStatus } from '../api/auth';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import type { User } from "../types/user";
+import {
+  getLinkedInAuthUrl,
+  refreshToken,
+  logout as apiLogout,
+  getAuthStatus,
+  devLogin as apiDevLogin,
+  type AuthStatus,
+} from "../api/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +34,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

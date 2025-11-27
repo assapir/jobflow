@@ -1,6 +1,6 @@
-import type { User, AuthResponse } from '../types/user';
+import type { User, AuthResponse } from "../types/user";
 
-const API_BASE = '/api/auth';
+const API_BASE = "/api/auth";
 
 export interface AuthStatus {
   linkedInConfigured: boolean;
@@ -12,11 +12,11 @@ export interface AuthStatus {
  */
 export async function getAuthStatus(): Promise<AuthStatus> {
   const response = await fetch(`${API_BASE}/status`, {
-    credentials: 'include',
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error('Failed to get auth status');
+    throw new Error("Failed to get auth status");
   }
 
   return response.json();
@@ -27,12 +27,12 @@ export async function getAuthStatus(): Promise<AuthStatus> {
  */
 export async function devLogin(): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE}/dev-login`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error('Dev login failed');
+    throw new Error("Dev login failed");
   }
 
   return response.json();
@@ -44,15 +44,15 @@ export async function devLogin(): Promise<AuthResponse> {
  */
 export async function getLinkedInAuthUrl(): Promise<string> {
   const response = await fetch(`${API_BASE}/linkedin`, {
-    credentials: 'include',
+    credentials: "include",
   });
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     if (data.devAuthEnabled) {
-      throw new Error('LINKEDIN_NOT_CONFIGURED');
+      throw new Error("LINKEDIN_NOT_CONFIGURED");
     }
-    throw new Error('Failed to initiate LinkedIn authentication');
+    throw new Error("Failed to initiate LinkedIn authentication");
   }
 
   const data = await response.json();
@@ -64,12 +64,12 @@ export async function getLinkedInAuthUrl(): Promise<string> {
  */
 export async function refreshToken(): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE}/refresh`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error('Failed to refresh token');
+    throw new Error("Failed to refresh token");
   }
 
   return response.json();
@@ -83,11 +83,11 @@ export async function getCurrentUser(accessToken: string): Promise<User> {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    credentials: 'include',
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error('Failed to get user info');
+    throw new Error("Failed to get user info");
   }
 
   return response.json();
@@ -98,7 +98,7 @@ export async function getCurrentUser(accessToken: string): Promise<User> {
  */
 export async function logout(): Promise<void> {
   await fetch(`${API_BASE}/logout`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
   });
 }

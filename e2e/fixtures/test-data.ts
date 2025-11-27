@@ -41,12 +41,20 @@ export function uniqueCompanyName(prefix = "Test"): string {
 }
 
 /**
+ * Generate a unique position name for test isolation
+ */
+export function uniquePositionName(prefix = "Engineer"): string {
+  return `${prefix} ${Date.now()}`;
+}
+
+/**
  * Generate a unique job data object
  */
 export function uniqueJobData(overrides: Partial<typeof testJobs.valid> = {}) {
   return {
     ...testJobs.valid,
     company: uniqueCompanyName(),
+    position: uniquePositionName(),
     ...overrides,
   };
 }

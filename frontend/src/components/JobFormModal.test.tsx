@@ -41,8 +41,12 @@ describe("JobFormModal", () => {
     );
 
     expect(screen.getByText("actions.add")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Google, Microsoft, etc.")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Software Engineer")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Google, Microsoft, etc.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Software Engineer")
+    ).toBeInTheDocument();
   });
 
   it("should not render modal when closed", () => {
@@ -55,7 +59,9 @@ describe("JobFormModal", () => {
       />
     );
 
-    expect(screen.queryByPlaceholderText("Google, Microsoft, etc.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Google, Microsoft, etc.")
+    ).not.toBeInTheDocument();
   });
 
   it("should show edit title when job is provided", () => {
@@ -85,7 +91,9 @@ describe("JobFormModal", () => {
     expect(screen.getByDisplayValue("Software Engineer")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Remote")).toBeInTheDocument();
     expect(screen.getByDisplayValue("$150,000")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("https://linkedin.com/jobs/123")).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("https://linkedin.com/jobs/123")
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Test description")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Some notes")).toBeInTheDocument();
   });
@@ -163,7 +171,9 @@ describe("JobFormModal", () => {
     // Fill required fields
     const companyInput = screen.getByPlaceholderText("Google, Microsoft, etc.");
     const positionInput = screen.getByPlaceholderText("Software Engineer");
-    const linkedinInput = screen.getByPlaceholderText("https://linkedin.com/jobs/...");
+    const linkedinInput = screen.getByPlaceholderText(
+      "https://linkedin.com/jobs/..."
+    );
 
     await user.type(companyInput, "Test Corp");
     await user.type(positionInput, "Developer");
@@ -248,7 +258,9 @@ describe("JobFormModal", () => {
 
     const companyInput = screen.getByPlaceholderText("Google, Microsoft, etc.");
     const positionInput = screen.getByPlaceholderText("Software Engineer");
-    const linkedinInput = screen.getByPlaceholderText("https://linkedin.com/jobs/...");
+    const linkedinInput = screen.getByPlaceholderText(
+      "https://linkedin.com/jobs/..."
+    );
 
     await user.type(companyInput, "Test Corp");
     await user.type(positionInput, "Developer");
