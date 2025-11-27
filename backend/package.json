@@ -11,6 +11,8 @@
     "build": "tsc",
     "start": "node --env-file-if-exists=.env dist/index.js",
     "lint": "oxlint src/",
+    "test": "node --import tsx --test 'src/__tests__/**/*.test.ts'",
+    "test:integration": "node --import tsx --test 'src/__tests__/integration/*.ts'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

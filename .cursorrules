@@ -1,0 +1,20 @@
+# Jobo Project Rules
+
+## Pre-Commit Requirements
+
+Before committing any changes, ensure all of the following pass:
+
+1. **Linting** - Run linters and fix any errors
+
+   - Frontend: `cd frontend && npm run lint`
+   - Backend: `cd backend && npm run lint`
+
+2. **Formatting** - Ensure code is properly formatted
+
+   - Use consistent formatting across all files
+
+3. **Tests** - All tests must pass
+   - Frontend unit tests: `cd frontend && npm test`
+   - Backend unit tests: `cd backend && npm test`
+
+Only commit when all linting, formatting, and tests pass successfully.
