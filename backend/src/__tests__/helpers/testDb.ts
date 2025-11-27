@@ -5,7 +5,7 @@ import * as schema from "../../db/schema.js";
 // Test database connection string - uses a separate test database
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5434/jobo_test";
+  "postgresql://postgres:postgres@localhost:5434/jobflow_test";
 
 let testClient: ReturnType<typeof postgres> | null = null;
 let testDb: ReturnType<typeof drizzle<typeof schema>> | null = null;

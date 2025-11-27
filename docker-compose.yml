@@ -1,20 +1,20 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: jobo-db
+    container_name: jobflow-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: jobo
+      POSTGRES_DB: jobflow
     ports:
       - "5434:5432"
     volumes:
-      - jobo_postgres_data:/var/lib/postgresql/data
+      - jobflow_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d jobo"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobflow"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
-  jobo_postgres_data:
+  jobflow_postgres_data:

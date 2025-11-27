@@ -1,5 +1,5 @@
 {
-  "name": "jobo-backend",
+  "name": "jobflow-backend",
   "version": "1.0.0",
   "description": "Job search management API",
   "type": "module",

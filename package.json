@@ -1,7 +1,7 @@
 {
-  "name": "jobo",
+  "name": "jobflow",
   "version": "1.0.0",
-  "description": "Job Search Manager - A Trello-style job application tracker",
+  "description": "JobFlow - Where applications flow, offers follow",
   "private": true,
   "engines": {
     "node": ">=22"

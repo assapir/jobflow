@@ -1,4 +1,6 @@
-# Jobo - Job Search Manager
+# JobFlow - Job Search Manager
+
+> *Where applications flow, offers follow*
 
 A modern job search management application with a Trello-style kanban board to track your job applications.
 
@@ -47,7 +49,7 @@ A modern job search management application with a Trello-style kanban board to t
 docker compose up -d
 
 # 2. Create backend .env file
-echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5434/jobo" > backend/.env
+echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5434/jobflow" > backend/.env
 echo "PORT=3001" >> backend/.env
 
 # 3. Install dependencies
@@ -55,7 +57,7 @@ npm install --prefix backend
 npm install --prefix frontend --legacy-peer-deps
 
 # 4. Push database schema
-cd backend && DATABASE_URL="postgresql://postgres:postgres@localhost:5434/jobo" npm run db:push && cd ..
+cd backend && DATABASE_URL="postgresql://postgres:postgres@localhost:5434/jobflow" npm run db:push && cd ..
 
 # 5. Start both servers
 npm run dev
@@ -66,7 +68,7 @@ npm run dev
 Create a `.env` file in the `backend` directory:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5434/jobo
+DATABASE_URL=postgresql://postgres:postgres@localhost:5434/jobflow
 PORT=3002
 ```
 
@@ -79,7 +81,7 @@ The `docker-compose.yml` starts:
 ## Project Structure
 
 ```
-jobo/
+jobflow/
 ├── backend/
 │   ├── src/
 │   │   ├── db/

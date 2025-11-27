@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, LoadingOverlay, Center, Text, Stack, Button, useMantineColorScheme, useDirection } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useJobs } from './hooks/useJobs';
-import { Header, KanbanBoard, JobFormModal, DeleteConfirmModal, LinkedInSearchModal } from './components';
+import { Header, Footer, KanbanBoard, JobFormModal, DeleteConfirmModal, LinkedInSearchModal } from './components';
 import type { JobApplication, CreateJobInput } from './types/job';
 
 export default function App() {
@@ -100,6 +100,8 @@ export default function App() {
       style={{
         minHeight: '100vh',
         background: bgGradient,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <LoadingOverlay
@@ -111,7 +113,7 @@ export default function App() {
 
       <Header onAddJob={handleAddJob} onSearchLinkedIn={openLinkedInModal} />
 
-      <Box p="md">
+      <Box p="md" style={{ flex: 1 }}>
         <KanbanBoard
           jobs={jobs}
           getJobsByStage={getJobsByStage}
@@ -141,6 +143,8 @@ export default function App() {
         onClose={closeLinkedInModal}
         onImport={handleLinkedInImport}
       />
+
+      <Footer />
     </Box>
   );
 }

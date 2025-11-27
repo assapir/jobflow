@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "Jobo",
-    "subtitle": "Job Search Manager"
+    "title": "JobFlow",
+    "subtitle": "Job Search Manager",
+    "tagline": "Where applications flow, offers follow"
   },
   "stages": {
     "wishlist": "Wishlist",
