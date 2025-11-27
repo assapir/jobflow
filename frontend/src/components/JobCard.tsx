@@ -1,8 +1,18 @@
-import { Text, Group, Badge, ActionIcon, Menu, Stack, Tooltip, Box, useMantineColorScheme } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
-import type { JobApplication } from '../types/job';
-import { Draggable } from '@hello-pangea/dnd';
-import type { CSSProperties } from 'react';
+import {
+  Text,
+  Group,
+  Badge,
+  ActionIcon,
+  Menu,
+  Stack,
+  Tooltip,
+  Box,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { useTranslation } from "react-i18next";
+import type { JobApplication } from "../types/job";
+import { Draggable } from "@hello-pangea/dnd";
+import type { CSSProperties } from "react";
 
 interface JobCardProps {
   job: JobApplication;
@@ -15,33 +25,37 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
   const { t } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
 
-  const getStyle = (isDragging: boolean, draggableStyle: CSSProperties | undefined): CSSProperties => {
-    const cardBg = colorScheme === 'dark'
-      ? 'linear-gradient(135deg, rgba(30, 30, 40, 0.9) 0%, rgba(20, 20, 30, 0.95) 100%)'
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%)';
+  const getStyle = (
+    isDragging: boolean,
+    draggableStyle: CSSProperties | undefined
+  ): CSSProperties => {
+    const cardBg =
+      colorScheme === "dark"
+        ? "linear-gradient(135deg, rgba(30, 30, 40, 0.9) 0%, rgba(20, 20, 30, 0.95) 100%)"
+        : "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%)";
 
-    const cardBorder = colorScheme === 'dark'
-      ? '1px solid rgba(255, 255, 255, 0.08)'
-      : '1px solid rgba(0, 0, 0, 0.08)';
+    const cardBorder =
+      colorScheme === "dark"
+        ? "1px solid rgba(255, 255, 255, 0.08)"
+        : "1px solid rgba(0, 0, 0, 0.08)";
 
-    const cardShadow = colorScheme === 'dark'
-      ? '0 4px 16px rgba(0, 0, 0, 0.2)'
-      : '0 2px 8px rgba(0, 0, 0, 0.08)';
+    const cardShadow =
+      colorScheme === "dark"
+        ? "0 4px 16px rgba(0, 0, 0, 0.2)"
+        : "0 2px 8px rgba(0, 0, 0, 0.08)";
 
     return {
-      userSelect: 'none',
+      userSelect: "none",
       marginBottom: 12,
       padding: 12,
       borderRadius: 8,
-      cursor: isDragging ? 'grabbing' : 'pointer',
+      cursor: isDragging ? "grabbing" : "pointer",
       background: isDragging
-        ? 'linear-gradient(135deg, rgba(0, 212, 236, 0.25) 0%, rgba(0, 168, 188, 0.25) 100%)'
+        ? "linear-gradient(135deg, rgba(0, 212, 236, 0.25) 0%, rgba(0, 168, 188, 0.25) 100%)"
         : cardBg,
-      border: isDragging
-        ? '2px solid rgba(0, 212, 236, 0.7)'
-        : cardBorder,
+      border: isDragging ? "2px solid rgba(0, 212, 236, 0.7)" : cardBorder,
       boxShadow: isDragging
-        ? '0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 212, 236, 0.4)'
+        ? "0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 212, 236, 0.4)"
         : cardShadow,
       ...draggableStyle,
     };
@@ -64,8 +78,20 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
               </Text>
               <Menu shadow="md" width={120} position="bottom-end">
                 <Menu.Target>
-                  <ActionIcon variant="subtle" size="sm" color="gray" onClick={(e) => e.stopPropagation()}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <ActionIcon
+                    variant="subtle"
+                    size="sm"
+                    color="gray"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <circle cx="12" cy="12" r="1" />
                       <circle cx="12" cy="5" r="1" />
                       <circle cx="12" cy="19" r="1" />
@@ -74,10 +100,10 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item onClick={() => onEdit(job)}>
-                    {t('actions.edit')}
+                    {t("actions.edit")}
                   </Menu.Item>
                   <Menu.Item color="red" onClick={() => onDelete(job)}>
-                    {t('actions.delete')}
+                    {t("actions.delete")}
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
@@ -89,14 +115,14 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
 
             <Group gap="xs">
               {job.location && (
-                <Tooltip label={t('job.location')}>
+                <Tooltip label={t("job.location")}>
                   <Badge size="xs" variant="light" color="gray">
                     📍 {job.location}
                   </Badge>
                 </Tooltip>
               )}
               {job.salary && (
-                <Tooltip label={t('job.salary')}>
+                <Tooltip label={t("job.salary")}>
                   <Badge size="xs" variant="light" color="green">
                     💰 {job.salary}
                   </Badge>
