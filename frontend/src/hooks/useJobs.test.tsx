@@ -100,7 +100,9 @@ describe("useJobs", () => {
     });
 
     it("should set error when fetch fails", async () => {
-      vi.mocked(api.fetchJobs).mockRejectedValueOnce(new Error("Network error"));
+      vi.mocked(api.fetchJobs).mockRejectedValueOnce(
+        new Error("Network error")
+      );
 
       const { result } = renderHook(() => useJobs(), {
         wrapper: createWrapper(),
@@ -127,8 +129,8 @@ describe("useJobs", () => {
       const wishlistJobs = result.current.getJobsByStage("wishlist");
 
       expect(wishlistJobs).toHaveLength(2);
-      expect(wishlistJobs[0].id).toBe("job-1"); // order 0
-      expect(wishlistJobs[1].id).toBe("job-3"); // order 1
+      expect(wishlistJobs[0]!.id).toBe("job-1"); // order 0
+      expect(wishlistJobs[1]!.id).toBe("job-3"); // order 1
     });
 
     it("should return empty array for stage with no jobs", async () => {
@@ -148,7 +150,7 @@ describe("useJobs", () => {
   describe("addJob", () => {
     it("should create a new job", async () => {
       const newJob: JobApplication = {
-        ...mockJobs[0],
+        ...mockJobs[0]!,
         id: "new-job",
         company: "New Company",
       };
@@ -180,7 +182,7 @@ describe("useJobs", () => {
 
   describe("editJob", () => {
     it("should update an existing job", async () => {
-      const updatedJob = { ...mockJobs[0], company: "Updated Company" };
+      const updatedJob = { ...mockJobs[0]!, company: "Updated Company" };
       vi.mocked(api.updateJob).mockResolvedValueOnce(updatedJob);
 
       const { result } = renderHook(() => useJobs(), {
@@ -222,7 +224,7 @@ describe("useJobs", () => {
 
   describe("moveJob", () => {
     it("should update job stage and order", async () => {
-      const movedJob = { ...mockJobs[0], stage: "applied" as const, order: 1 };
+      const movedJob = { ...mockJobs[0]!, stage: "applied" as const, order: 1 };
       vi.mocked(api.updateJobStage).mockResolvedValueOnce(movedJob);
 
       const { result } = renderHook(() => useJobs(), {

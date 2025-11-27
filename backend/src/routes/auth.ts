@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   initiateLinkedInAuth,
   handleLinkedInCallback,
@@ -7,30 +7,30 @@ import {
   logout,
   getAuthStatus,
   devLogin,
-} from '../controllers/auth.js';
-import { requireAuth } from '../middleware/auth.js';
+} from "../controllers/auth.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
 // Auth status (check if LinkedIn is configured, dev mode, etc.)
-router.get('/status', getAuthStatus);
+router.get("/status", getAuthStatus);
 
 // Dev-only login bypass
-router.post('/dev-login', devLogin);
+router.post("/dev-login", devLogin);
 
 // Initiate LinkedIn OAuth flow
-router.get('/linkedin', initiateLinkedInAuth);
+router.get("/linkedin", initiateLinkedInAuth);
 
 // Handle LinkedIn OAuth callback
-router.get('/linkedin/callback', handleLinkedInCallback);
+router.get("/linkedin/callback", handleLinkedInCallback);
 
 // Refresh access token
-router.post('/refresh', refreshAccessToken);
+router.post("/refresh", refreshAccessToken);
 
 // Get current user (protected)
-router.get('/me', requireAuth, getCurrentUser);
+router.get("/me", requireAuth, getCurrentUser);
 
 // Logout
-router.post('/logout', logout);
+router.post("/logout", logout);
 
 export default router;

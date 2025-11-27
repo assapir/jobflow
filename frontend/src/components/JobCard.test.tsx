@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, fireEvent } from "@testing-library/react";
 import { renderWithDnd } from "../test/test-utils";
 import { JobCard } from "./JobCard";
@@ -49,13 +49,11 @@ vi.mock("@hello-pangea/dnd", async () => {
     Droppable: ({
       children,
     }: {
-      children: (
-        provided: {
-          innerRef: React.Ref<HTMLElement>;
-          droppableProps: Record<string, unknown>;
-          placeholder: React.ReactNode;
-        }
-      ) => React.ReactNode;
+      children: (provided: {
+        innerRef: React.Ref<HTMLElement>;
+        droppableProps: Record<string, unknown>;
+        placeholder: React.ReactNode;
+      }) => React.ReactNode;
     }) =>
       children({
         innerRef: () => {},

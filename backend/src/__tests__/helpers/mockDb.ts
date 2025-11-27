@@ -1,4 +1,3 @@
-
 // Types for mock database
 export interface MockJob {
   id: string;
@@ -35,11 +34,13 @@ export function getMockJobs() {
 }
 
 // Create mock request and response objects
-export function createMockRequest(overrides: Partial<{
-  params: Record<string, string>;
-  body: Record<string, unknown>;
-  query: Record<string, string>;
-}> = {}) {
+export function createMockRequest(
+  overrides: Partial<{
+    params: Record<string, string>;
+    body: Record<string, unknown>;
+    query: Record<string, string>;
+  }> = {}
+) {
   return {
     params: overrides.params || {},
     body: overrides.body || {},

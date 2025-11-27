@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { Box, Center, Loader, Text, Stack } from '@mantine/core';
-import { useAuth } from '../context/AuthContext';
+import { useEffect } from "react";
+import { Box, Center, Loader, Text, Stack } from "@mantine/core";
+import { useAuth } from "../context/AuthContext";
 
 interface AuthCallbackProps {
   onComplete: () => void;
@@ -12,14 +12,14 @@ export function AuthCallback({ onComplete }: AuthCallbackProps) {
   useEffect(() => {
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
+      const token = params.get("token");
 
       if (token) {
         await setAuthFromCallback(token);
       }
 
       // Clean up URL and redirect to main app
-      window.history.replaceState({}, document.title, '/');
+      window.history.replaceState({}, document.title, "/");
       onComplete();
     }
 
@@ -29,10 +29,10 @@ export function AuthCallback({ onComplete }: AuthCallbackProps) {
   return (
     <Box
       style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Center>

@@ -268,9 +268,21 @@ describe("Jobs Integration Tests", () => {
 
   describe("Batch Operations", () => {
     it("should handle batch updates for reordering", async () => {
-      const job1 = await createTestJob({ company: "A", stage: "wishlist", order: 0 });
-      const job2 = await createTestJob({ company: "B", stage: "wishlist", order: 1 });
-      const job3 = await createTestJob({ company: "C", stage: "wishlist", order: 2 });
+      const job1 = await createTestJob({
+        company: "A",
+        stage: "wishlist",
+        order: 0,
+      });
+      const job2 = await createTestJob({
+        company: "B",
+        stage: "wishlist",
+        order: 1,
+      });
+      const job3 = await createTestJob({
+        company: "C",
+        stage: "wishlist",
+        order: 2,
+      });
 
       // Reorder: C -> 0, A -> 1, B -> 2
       const updates = [

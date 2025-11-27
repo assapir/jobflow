@@ -63,7 +63,9 @@ export async function getJobById(req: Request, res: Response) {
     const [job] = await db
       .select()
       .from(jobApplications)
-      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)));
+      .where(
+        and(eq(jobApplications.id, id), eq(jobApplications.userId, userId))
+      );
 
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
@@ -93,10 +95,12 @@ export async function createJob(req: Request, res: Response) {
     const existingJobs = await db
       .select()
       .from(jobApplications)
-      .where(and(
-        eq(jobApplications.stage, (data.stage || "wishlist") as Stage),
-        eq(jobApplications.userId, userId)
-      ));
+      .where(
+        and(
+          eq(jobApplications.stage, (data.stage || "wishlist") as Stage),
+          eq(jobApplications.userId, userId)
+        )
+      );
 
     const maxOrder = existingJobs.reduce(
       (max, job) => Math.max(max, job.order),
@@ -161,7 +165,9 @@ export async function updateJob(req: Request, res: Response) {
     const [job] = await db
       .update(jobApplications)
       .set(updateData)
-      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
+      .where(
+        and(eq(jobApplications.id, id), eq(jobApplications.userId, userId))
+      )
       .returning();
 
     if (!job) {
@@ -181,7 +187,9 @@ export async function deleteJob(req: Request, res: Response) {
     const userId = req.user!.sub;
     const [job] = await db
       .delete(jobApplications)
-      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
+      .where(
+        and(eq(jobApplications.id, id), eq(jobApplications.userId, userId))
+      )
       .returning();
 
     if (!job) {
@@ -212,7 +220,9 @@ export async function updateJobStage(req: Request, res: Response) {
         order: order ?? 0,
         updatedAt: new Date(),
       })
-      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
+      .where(
+        and(eq(jobApplications.id, id), eq(jobApplications.userId, userId))
+      )
       .returning();
 
     if (!job) {
@@ -248,7 +258,12 @@ export async function reorderJobs(req: Request, res: Response) {
           order: job.order,
           updatedAt: new Date(),
         })
-        .where(and(eq(jobApplications.id, job.id), eq(jobApplications.userId, userId)));
+        .where(
+          and(
+            eq(jobApplications.id, job.id),
+            eq(jobApplications.userId, userId)
+          )
+        );
     });
 
     await Promise.all(updates);

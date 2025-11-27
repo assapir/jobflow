@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+
+const authFile = path.join(__dirname, ".auth/user.json");
 
 /**
  * Playwright configuration for E2E tests
@@ -12,10 +15,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Use 2 workers on CI for faster execution */
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: process.env.CI ? [["list"], ["html"]] : "html",
   /* Shared settings for all the projects below. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -28,18 +31,31 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project - authenticates before running tests
+    {
+      name: "setup",
+      testDir: ".",
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Use authenticated state from setup
+        storageState: authFile,
+      },
+      dependencies: ["setup"],
     },
     // Uncomment to test on more browsers
     // {
     //   name: "firefox",
-    //   use: { ...devices["Desktop Firefox"] },
+    //   use: { ...devices["Desktop Firefox"], storageState: authFile },
+    //   dependencies: ["setup"],
     // },
     // {
     //   name: "webkit",
-    //   use: { ...devices["Desktop Safari"] },
+    //   use: { ...devices["Desktop Safari"], storageState: authFile },
+    //   dependencies: ["setup"],
     // },
   ],
 
@@ -50,14 +66,22 @@ export default defineConfig({
       cwd: "..",
       url: "http://localhost:3002/api/health",
       reuseExistingServer: !process.env.CI,
-      timeout: 30000,
+      timeout: 60000,
+      stdout: "pipe",
+      stderr: "pipe",
+      env: {
+        ...process.env,
+        DEV_AUTH_BYPASS: "true",
+      },
     },
     {
       command: "npm run dev:frontend",
       cwd: "..",
       url: "http://localhost:5173",
       reuseExistingServer: !process.env.CI,
-      timeout: 30000,
+      timeout: 60000,
+      stdout: "pipe",
+      stderr: "pipe",
     },
   ],
 });
