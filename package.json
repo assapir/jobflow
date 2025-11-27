@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Job Search Manager - A Trello-style job application tracker",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
@@ -17,6 +20,6 @@
     "db:studio": "cd backend && npm run db:studio"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.2.1"
   }
 }

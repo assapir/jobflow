@@ -1,4 +1,4 @@
-import { PlaywrightCrawler, Dataset } from "crawlee";
+import { PlaywrightCrawler } from "crawlee";
 
 export interface LinkedInJob {
   title: string;

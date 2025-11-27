@@ -90,3 +90,4 @@ export function KanbanAccordionItem({ stage, jobs, onEditJob, onDeleteJob }: Kan
     </Accordion.Item>
   );
 }
+

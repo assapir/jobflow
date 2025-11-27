@@ -80,7 +80,7 @@ export async function createJob(req: Request, res: Response) {
     if (!validation.success) {
       return res
         .status(400)
-        .json({ error: "Validation failed", details: validation.error.errors });
+        .json({ error: "Validation failed", details: validation.error.issues });
     }
 
     const data = validation.data;
@@ -125,7 +125,7 @@ export async function updateJob(req: Request, res: Response) {
     if (!validation.success) {
       return res
         .status(400)
-        .json({ error: "Validation failed", details: validation.error.errors });
+        .json({ error: "Validation failed", details: validation.error.issues });
     }
 
     const data = validation.data;
@@ -222,7 +222,7 @@ export async function reorderJobs(req: Request, res: Response) {
     if (!validation.success) {
       return res
         .status(400)
-        .json({ error: "Validation failed", details: validation.error.errors });
+        .json({ error: "Validation failed", details: validation.error.issues });
     }
 
     const { jobs } = validation.data;

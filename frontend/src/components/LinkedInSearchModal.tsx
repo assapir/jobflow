@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Modal,
   TextInput,
@@ -15,11 +15,11 @@ import {
   Box,
   Anchor,
   useMantineColorScheme,
-} from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { useTranslation } from 'react-i18next';
-import { searchLinkedInJobs, LinkedInSearchError } from '../api/linkedin';
-import type { LinkedInJob, CreateJobInput } from '../types/job';
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { useTranslation } from "react-i18next";
+import { searchLinkedInJobs, LinkedInSearchError } from "../api/linkedin";
+import type { LinkedInJob, CreateJobInput } from "../types/job";
 
 interface LinkedInSearchModalProps {
   opened: boolean;
@@ -27,13 +27,17 @@ interface LinkedInSearchModalProps {
   onImport: (jobs: CreateJobInput[]) => Promise<void>;
 }
 
-export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearchModalProps) {
+export function LinkedInSearchModal({
+  opened,
+  onClose,
+  onImport,
+}: LinkedInSearchModalProps) {
   const { t } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const [query, setQuery] = useState('');
-  const [location, setLocation] = useState('');
+  const [query, setQuery] = useState("");
+  const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<LinkedInJob[]>([]);
@@ -49,18 +53,21 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
     setSelectedJobs(new Set());
 
     try {
-      const response = await searchLinkedInJobs(query.trim(), location.trim() || undefined);
+      const response = await searchLinkedInJobs(
+        query.trim(),
+        location.trim() || undefined
+      );
       setResults(response.jobs);
       setHasSearched(true);
     } catch (err) {
       if (err instanceof LinkedInSearchError) {
         if (err.retryAfter) {
-          setError(t('linkedin.rateLimited', { seconds: err.retryAfter }));
+          setError(t("linkedin.rateLimited", { seconds: err.retryAfter }));
         } else {
           setError(err.message);
         }
       } else {
-        setError(t('linkedin.searchError'));
+        setError(t("linkedin.searchError"));
       }
       setResults([]);
     } finally {
@@ -97,21 +104,21 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
         position: job.title,
         location: job.location || undefined,
         linkedinUrl: job.url,
-        stage: 'wishlist',
+        stage: "wishlist",
       }));
 
       await onImport(createInputs);
       handleClose();
-    } catch (err) {
-      setError(t('linkedin.importError'));
+    } catch {
+      setError(t("linkedin.importError"));
     } finally {
       setImporting(false);
     }
   };
 
   const handleClose = () => {
-    setQuery('');
-    setLocation('');
+    setQuery("");
+    setLocation("");
     setResults([]);
     setSelectedJobs(new Set());
     setError(null);
@@ -129,24 +136,30 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
   };
 
   const modalHeaderBg =
-    colorScheme === 'dark'
-      ? 'linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.99) 100%)'
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)';
+    colorScheme === "dark"
+      ? "linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.99) 100%)"
+      : "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
 
   const modalContentBg =
-    colorScheme === 'dark'
-      ? 'linear-gradient(180deg, rgba(25, 25, 35, 0.98) 0%, rgba(15, 15, 25, 0.99) 100%)'
-      : 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)';
+    colorScheme === "dark"
+      ? "linear-gradient(180deg, rgba(25, 25, 35, 0.98) 0%, rgba(15, 15, 25, 0.99) 100%)"
+      : "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
 
-  const borderColor = colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)';
+  const borderColor =
+    colorScheme === "dark"
+      ? "rgba(255, 255, 255, 0.06)"
+      : "rgba(0, 0, 0, 0.08)";
 
-  const cardBg = colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
+  const cardBg =
+    colorScheme === "dark"
+      ? "rgba(255, 255, 255, 0.03)"
+      : "rgba(0, 0, 0, 0.02)";
 
   return (
     <Modal
       opened={opened}
       onClose={handleClose}
-      title={t('linkedin.searchTitle')}
+      title={t("linkedin.searchTitle")}
       size="xl"
       fullScreen={isMobile}
       styles={{
@@ -163,19 +176,19 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
         {/* Search Form */}
         <Group grow={!isMobile} align="flex-end">
           <TextInput
-            label={t('linkedin.keywords')}
-            placeholder={t('linkedin.keywordsPlaceholder')}
+            label={t("linkedin.keywords")}
+            placeholder={t("linkedin.keywordsPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             disabled={loading}
           />
           <TextInput
-            label={t('linkedin.location')}
-            placeholder={t('linkedin.locationPlaceholder')}
+            label={t("linkedin.location")}
+            placeholder={t("linkedin.locationPlaceholder")}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             disabled={loading}
           />
           <Button
@@ -183,9 +196,9 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
             loading={loading}
             disabled={!query.trim()}
             variant="gradient"
-            gradient={{ from: 'cyan', to: 'teal', deg: 135 }}
+            gradient={{ from: "cyan", to: "teal", deg: 135 }}
           >
-            {t('linkedin.search')}
+            {t("linkedin.search")}
           </Button>
         </Group>
 
@@ -198,10 +211,10 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
 
         {/* Loading State */}
         {loading && (
-          <Box py="xl" style={{ textAlign: 'center' }}>
+          <Box py="xl" style={{ textAlign: "center" }}>
             <Loader color="cyan" size="lg" />
             <Text c="dimmed" size="sm" mt="md">
-              {t('linkedin.searching')}
+              {t("linkedin.searching")}
             </Text>
           </Box>
         )}
@@ -211,18 +224,18 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
           <>
             <Group justify="space-between" align="center">
               <Text size="sm" c="dimmed">
-                {t('linkedin.resultsCount', { count: results.length })}
+                {t("linkedin.resultsCount", { count: results.length })}
               </Text>
               <Group gap="sm">
                 <Button variant="subtle" size="xs" onClick={selectAll}>
                   {selectedJobs.size === results.length
-                    ? t('linkedin.deselectAll')
-                    : t('linkedin.selectAll')}
+                    ? t("linkedin.deselectAll")
+                    : t("linkedin.selectAll")}
                 </Button>
               </Group>
             </Group>
 
-            <ScrollArea h={isMobile ? 'calc(100vh - 350px)' : 400}>
+            <ScrollArea h={isMobile ? "calc(100vh - 350px)" : 400}>
               <Stack gap="sm">
                 {results.map((job) => (
                   <Card
@@ -232,9 +245,9 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
                     style={{
                       background: cardBg,
                       borderColor: selectedJobs.has(job.url)
-                        ? 'var(--mantine-color-cyan-6)'
+                        ? "var(--mantine-color-cyan-6)"
                         : borderColor,
-                      cursor: 'pointer',
+                      cursor: "pointer",
                     }}
                     onClick={() => toggleJobSelection(job.url)}
                   >
@@ -271,7 +284,7 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
                           size="xs"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {t('linkedin.viewOnLinkedIn')}
+                          {t("linkedin.viewOnLinkedIn")}
                         </Anchor>
                       </Stack>
                     </Group>
@@ -283,16 +296,16 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
             {/* Import Button */}
             <Group justify="flex-end" mt="md">
               <Button variant="subtle" onClick={handleClose}>
-                {t('actions.cancel')}
+                {t("actions.cancel")}
               </Button>
               <Button
                 onClick={handleImport}
                 loading={importing}
                 disabled={selectedJobs.size === 0}
                 variant="gradient"
-                gradient={{ from: 'cyan', to: 'teal', deg: 135 }}
+                gradient={{ from: "cyan", to: "teal", deg: 135 }}
               >
-                {t('linkedin.importSelected', { count: selectedJobs.size })}
+                {t("linkedin.importSelected", { count: selectedJobs.size })}
               </Button>
             </Group>
           </>
@@ -300,8 +313,8 @@ export function LinkedInSearchModal({ opened, onClose, onImport }: LinkedInSearc
 
         {/* Empty State */}
         {!loading && hasSearched && results.length === 0 && (
-          <Box py="xl" style={{ textAlign: 'center' }}>
-            <Text c="dimmed">{t('linkedin.noResults')}</Text>
+          <Box py="xl" style={{ textAlign: "center" }}>
+            <Text c="dimmed">{t("linkedin.noResults")}</Text>
           </Box>
         )}
       </Stack>

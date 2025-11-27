@@ -30,3 +30,4 @@ drizzle/*.sql
 
 # Crawlee storage
 storage/
+tsconfig.tsbuildinfo

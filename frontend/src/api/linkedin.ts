@@ -56,3 +56,4 @@ export async function clearLinkedInCache(): Promise<void> {
     throw new LinkedInSearchError('Failed to clear cache');
   }
 }
+

@@ -10,3 +10,4 @@ router.get('/search', searchLinkedInJobs);
 router.post('/cache/clear', clearLinkedInCache);
 
 export default router;
+
