@@ -29,7 +29,7 @@ interface AuthContextType {
   getAccessToken: () => string | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function useAuth() {
   const context = useContext(AuthContext);

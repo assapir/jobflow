@@ -7,11 +7,12 @@ import {
   Stack,
   Tooltip,
   Box,
-  useMantineColorScheme,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { IconDotsVertical } from "@tabler/icons-react";
 import type { JobApplication } from "../types/job";
 import { Draggable } from "@hello-pangea/dnd";
+import { useThemeColors } from "../design-system";
 import type { CSSProperties } from "react";
 
 interface JobCardProps {
@@ -23,40 +24,28 @@ interface JobCardProps {
 
 export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
   const { t } = useTranslation();
-  const { colorScheme } = useMantineColorScheme();
+  const {
+    cardBg,
+    borderColor,
+    cardShadow,
+    dragHighlightBg,
+    dragBorder,
+    dragShadow,
+  } = useThemeColors();
 
   const getStyle = (
     isDragging: boolean,
     draggableStyle: CSSProperties | undefined
   ): CSSProperties => {
-    const cardBg =
-      colorScheme === "dark"
-        ? "linear-gradient(135deg, rgba(30, 30, 40, 0.9) 0%, rgba(20, 20, 30, 0.95) 100%)"
-        : "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%)";
-
-    const cardBorder =
-      colorScheme === "dark"
-        ? "1px solid rgba(255, 255, 255, 0.08)"
-        : "1px solid rgba(0, 0, 0, 0.08)";
-
-    const cardShadow =
-      colorScheme === "dark"
-        ? "0 4px 16px rgba(0, 0, 0, 0.2)"
-        : "0 2px 8px rgba(0, 0, 0, 0.08)";
-
     return {
       userSelect: "none",
       marginBottom: 12,
       padding: 12,
       borderRadius: 8,
       cursor: isDragging ? "grabbing" : "pointer",
-      background: isDragging
-        ? "linear-gradient(135deg, rgba(0, 212, 236, 0.25) 0%, rgba(0, 168, 188, 0.25) 100%)"
-        : cardBg,
-      border: isDragging ? "2px solid rgba(0, 212, 236, 0.7)" : cardBorder,
-      boxShadow: isDragging
-        ? "0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 212, 236, 0.4)"
-        : cardShadow,
+      background: isDragging ? dragHighlightBg : cardBg,
+      border: isDragging ? dragBorder : `1px solid ${borderColor}`,
+      boxShadow: isDragging ? dragShadow : cardShadow,
       ...draggableStyle,
     };
   };
@@ -84,18 +73,7 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
                     color="gray"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="1" />
-                      <circle cx="12" cy="5" r="1" />
-                      <circle cx="12" cy="19" r="1" />
-                    </svg>
+                    <IconDotsVertical size={16} stroke={2} />
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
