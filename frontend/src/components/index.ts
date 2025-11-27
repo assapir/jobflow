@@ -7,3 +7,5 @@ export { JobCard } from './JobCard';
 export { JobFormModal } from './JobFormModal';
 export { DeleteConfirmModal } from './DeleteConfirmModal';
 export { LinkedInSearchModal } from './LinkedInSearchModal';
+export { LoginPage } from './LoginPage';
+export { AuthCallback } from './AuthCallback';

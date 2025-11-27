@@ -27,6 +27,16 @@ const mockJob: JobApplication = {
   updatedAt: "2024-01-01T00:00:00Z",
 };
 
+// Helper to create expected fetch call args with auth headers
+const withAuthHeaders = (options: RequestInit = {}) => ({
+  ...options,
+  headers: {
+    "Content-Type": "application/json",
+    ...options.headers,
+  },
+  credentials: "include",
+});
+
 describe("jobs API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -42,7 +52,7 @@ describe("jobs API", () => {
 
       const result = await fetchJobs();
 
-      expect(mockFetch).toHaveBeenCalledWith("/api/jobs");
+      expect(mockFetch).toHaveBeenCalledWith("/api/jobs", withAuthHeaders());
       expect(result).toEqual(jobs);
     });
 
@@ -75,7 +85,8 @@ describe("jobs API", () => {
       const result = await fetchJob("123e4567-e89b-12d3-a456-426614174000");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "/api/jobs/123e4567-e89b-12d3-a456-426614174000"
+        "/api/jobs/123e4567-e89b-12d3-a456-426614174000",
+        withAuthHeaders()
       );
       expect(result).toEqual(mockJob);
     });
@@ -105,11 +116,13 @@ describe("jobs API", () => {
 
       const result = await createJob(newJobInput);
 
-      expect(mockFetch).toHaveBeenCalledWith("/api/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newJobInput),
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/jobs",
+        withAuthHeaders({
+          method: "POST",
+          body: JSON.stringify(newJobInput),
+        })
+      );
       expect(result.company).toBe("New Company");
     });
 
@@ -136,11 +149,13 @@ describe("jobs API", () => {
 
       const result = await updateJob(mockJob.id, updateData);
 
-      expect(mockFetch).toHaveBeenCalledWith(`/api/jobs/${mockJob.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        `/api/jobs/${mockJob.id}`,
+        withAuthHeaders({
+          method: "PUT",
+          body: JSON.stringify(updateData),
+        })
+      );
       expect(result.company).toBe("Updated Company");
     });
 
@@ -165,9 +180,12 @@ describe("jobs API", () => {
 
       await expect(deleteJob(mockJob.id)).resolves.toBeUndefined();
 
-      expect(mockFetch).toHaveBeenCalledWith(`/api/jobs/${mockJob.id}`, {
-        method: "DELETE",
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        `/api/jobs/${mockJob.id}`,
+        withAuthHeaders({
+          method: "DELETE",
+        })
+      );
     });
 
     it("should throw error when job not found", async () => {
@@ -191,11 +209,13 @@ describe("jobs API", () => {
 
       const result = await updateJobStage(mockJob.id, "interview", 1);
 
-      expect(mockFetch).toHaveBeenCalledWith(`/api/jobs/${mockJob.id}/stage`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: "interview", order: 1 }),
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        `/api/jobs/${mockJob.id}/stage`,
+        withAuthHeaders({
+          method: "PATCH",
+          body: JSON.stringify({ stage: "interview", order: 1 }),
+        })
+      );
       expect(result.stage).toBe("interview");
       expect(result.order).toBe(1);
     });
@@ -230,11 +250,13 @@ describe("jobs API", () => {
 
       const result = await reorderJobs(reorderData);
 
-      expect(mockFetch).toHaveBeenCalledWith("/api/jobs/reorder", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reorderData),
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/jobs/reorder",
+        withAuthHeaders({
+          method: "PATCH",
+          body: JSON.stringify(reorderData),
+        })
+      );
       expect(result).toHaveLength(2);
     });
 

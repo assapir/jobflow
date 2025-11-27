@@ -1,4 +1,5 @@
 import type { LinkedInSearchResponse } from '../types/job';
+import { fetchWithAuth } from './client';
 
 const API_BASE = '/api/linkedin';
 
@@ -43,12 +44,12 @@ export async function searchLinkedInJobs(
     params.set('location', location);
   }
 
-  const response = await fetch(`${API_BASE}/search?${params.toString()}`);
+  const response = await fetchWithAuth(`${API_BASE}/search?${params.toString()}`);
   return handleResponse<LinkedInSearchResponse>(response);
 }
 
 export async function clearLinkedInCache(): Promise<void> {
-  const response = await fetch(`${API_BASE}/cache/clear`, {
+  const response = await fetchWithAuth(`${API_BASE}/cache/clear`, {
     method: 'POST',
   });
 
@@ -56,4 +57,3 @@ export async function clearLinkedInCache(): Promise<void> {
     throw new LinkedInSearchError('Failed to clear cache');
   }
 }
-

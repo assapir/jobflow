@@ -4,6 +4,9 @@
     "subtitle": "Job Search Manager",
     "tagline": "Where applications flow, offers follow"
   },
+  "auth": {
+    "logout": "Sign out"
+  },
   "stages": {
     "wishlist": "Wishlist",
     "applied": "Applied",

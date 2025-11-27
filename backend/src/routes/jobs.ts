@@ -8,8 +8,12 @@ import {
   updateJobStage,
   reorderJobs,
 } from "../controllers/jobs.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
+
+// All job routes require authentication
+router.use(requireAuth);
 
 router.get("/", getAllJobs);
 router.get("/:id", getJobById);

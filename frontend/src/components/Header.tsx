@@ -1,15 +1,19 @@
-import { Group, Title, Button, ActionIcon, useMantineColorScheme, Menu, Text, Box, Tooltip } from '@mantine/core';
+import { Group, Title, Button, ActionIcon, useMantineColorScheme, Menu, Text, Box, Tooltip, Avatar } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
+import type { User } from '../types/user';
 
 interface HeaderProps {
   onAddJob: () => void;
   onSearchLinkedIn: () => void;
+  user?: User | null;
 }
 
-export function Header({ onAddJob, onSearchLinkedIn }: HeaderProps) {
+export function Header({ onAddJob, onSearchLinkedIn, user }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { logout } = useAuth();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const changeLanguage = (lang: string) => {
@@ -23,6 +27,15 @@ export function Header({ onAddJob, onSearchLinkedIn }: HeaderProps) {
   const borderColor = colorScheme === 'dark'
     ? 'rgba(255, 255, 255, 0.06)'
     : 'rgba(0, 0, 0, 0.08)';
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <Box
@@ -162,6 +175,47 @@ export function Header({ onAddJob, onSearchLinkedIn }: HeaderProps) {
               </svg>
             )}
           </ActionIcon>
+
+          {/* User Menu */}
+          {user && (
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <ActionIcon variant="subtle" size="lg" radius="xl">
+                  <Avatar
+                    src={user.profilePicture}
+                    alt={user.name}
+                    size="sm"
+                    radius="xl"
+                    color="cyan"
+                  >
+                    {getInitials(user.name)}
+                  </Avatar>
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>
+                  <Text size="sm" fw={500}>{user.name}</Text>
+                  {user.email && (
+                    <Text size="xs" c="dimmed">{user.email}</Text>
+                  )}
+                </Menu.Label>
+                <Menu.Divider />
+                <Menu.Item
+                  color="red"
+                  onClick={logout}
+                  leftSection={
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  }
+                >
+                  {t('auth.logout')}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
         </Group>
       </Group>
     </Box>

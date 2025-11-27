@@ -1,21 +1,68 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Box, LoadingOverlay, Center, Text, Stack, Button, useMantineColorScheme, useDirection } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { useJobs } from './hooks/useJobs';
-import { Header, Footer, KanbanBoard, JobFormModal, DeleteConfirmModal, LinkedInSearchModal } from './components';
-import type { JobApplication, CreateJobInput } from './types/job';
+import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Box,
+  LoadingOverlay,
+  Center,
+  Text,
+  Stack,
+  Button,
+  useMantineColorScheme,
+  useDirection,
+  Loader,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { useJobs } from "./hooks/useJobs";
+import {
+  Header,
+  Footer,
+  KanbanBoard,
+  JobFormModal,
+  DeleteConfirmModal,
+  LinkedInSearchModal,
+  LoginPage,
+  AuthCallback,
+} from "./components";
+import { useAuth } from "./context/AuthContext";
+import { setAccessTokenGetter } from "./api/client";
+import type { JobApplication, CreateJobInput } from "./types/job";
 
 export default function App() {
   const { i18n } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
   const { setDirection } = useDirection();
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    getAccessToken,
+    user,
+  } = useAuth();
+  const [isCallback, setIsCallback] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Connect the access token getter to the API client
+  useEffect(() => {
+    setAccessTokenGetter(getAccessToken);
+  }, [getAccessToken]);
+
+  // Check if this is an OAuth callback
+  useEffect(() => {
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+
+    if (path === "/auth/callback" && params.has("token")) {
+      setIsCallback(true);
+    } else if (path === "/login" && params.has("error")) {
+      setLoginError(params.get("error"));
+      window.history.replaceState({}, document.title, "/login");
+    }
+  }, []);
 
   // Sync RTL direction with language
   useEffect(() => {
-    const isRTL = i18n.language === 'he';
-    setDirection(isRTL ? 'rtl' : 'ltr');
-    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    const isRTL = i18n.language === "he";
+    setDirection(isRTL ? "rtl" : "ltr");
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
   }, [i18n.language, setDirection]);
 
   const {
@@ -31,9 +78,16 @@ export default function App() {
     refresh,
   } = useJobs();
 
-  const [formModalOpened, { open: openFormModal, close: closeFormModal }] = useDisclosure(false);
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
-  const [linkedInModalOpened, { open: openLinkedInModal, close: closeLinkedInModal }] = useDisclosure(false);
+  const [formModalOpened, { open: openFormModal, close: closeFormModal }] =
+    useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
+  const [
+    linkedInModalOpened,
+    { open: openLinkedInModal, close: closeLinkedInModal },
+  ] = useDisclosure(false);
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null);
 
   const handleAddJob = () => {
@@ -73,19 +127,65 @@ export default function App() {
     }
   };
 
-  const bgColor = colorScheme === 'dark' ? '#0a0a0f' : '#f8f9fa';
-  const bgGradient = colorScheme === 'dark'
-    ? 'linear-gradient(180deg, #0a0a0f 0%, #0f0f18 50%, #0a0a0f 100%)'
-    : 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%)';
+  const handleCallbackComplete = useCallback(() => {
+    setIsCallback(false);
+    refresh();
+  }, [refresh]);
+
+  const bgColor = colorScheme === "dark" ? "#0a0a0f" : "#f8f9fa";
+  const bgGradient =
+    colorScheme === "dark"
+      ? "linear-gradient(180deg, #0a0a0f 0%, #0f0f18 50%, #0a0a0f 100%)"
+      : "linear-gradient(180deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%)";
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <Box
+        style={{
+          minHeight: "100vh",
+          background: bgColor,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Center>
+          <Stack align="center" gap="md">
+            <Loader size="lg" color="cyan" />
+            <Text c="dimmed">Loading...</Text>
+          </Stack>
+        </Center>
+      </Box>
+    );
+  }
+
+  // Handle OAuth callback
+  if (isCallback) {
+    return <AuthCallback onComplete={handleCallbackComplete} />;
+  }
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage error={loginError} />;
+  }
 
   if (error && jobs.length === 0) {
     return (
-      <Box style={{ minHeight: '100vh', background: bgColor }}>
-        <Header onAddJob={handleAddJob} onSearchLinkedIn={openLinkedInModal} />
-        <Center style={{ height: 'calc(100vh - 80px)' }}>
+      <Box style={{ minHeight: "100vh", background: bgColor }}>
+        <Header
+          onAddJob={handleAddJob}
+          onSearchLinkedIn={openLinkedInModal}
+          user={user}
+        />
+        <Center style={{ height: "calc(100vh - 80px)" }}>
           <Stack align="center" gap="md">
-            <Text c="red" size="lg">Failed to load jobs</Text>
-            <Text c="dimmed" size="sm">{error}</Text>
+            <Text c="red" size="lg">
+              Failed to load jobs
+            </Text>
+            <Text c="dimmed" size="sm">
+              {error}
+            </Text>
             <Button onClick={refresh} variant="light">
               Try Again
             </Button>
@@ -98,20 +198,24 @@ export default function App() {
   return (
     <Box
       style={{
-        minHeight: '100vh',
+        minHeight: "100vh",
         background: bgGradient,
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <LoadingOverlay
         visible={loading}
         zIndex={1000}
-        overlayProps={{ blur: 2, bg: 'rgba(0, 0, 0, 0.8)' }}
-        loaderProps={{ color: 'cyan', type: 'bars' }}
+        overlayProps={{ blur: 2, bg: "rgba(0, 0, 0, 0.8)" }}
+        loaderProps={{ color: "cyan", type: "bars" }}
       />
 
-      <Header onAddJob={handleAddJob} onSearchLinkedIn={openLinkedInModal} />
+      <Header
+        onAddJob={handleAddJob}
+        onSearchLinkedIn={openLinkedInModal}
+        user={user}
+      />
 
       <Box p="md" style={{ flex: 1 }}>
         <KanbanBoard

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 import {
   db,
   jobApplications,
@@ -41,11 +41,13 @@ const reorderSchema = z.object({
   ),
 });
 
-export async function getAllJobs(_req: Request, res: Response) {
+export async function getAllJobs(req: Request, res: Response) {
   try {
+    const userId = req.user!.sub;
     const jobs = await db
       .select()
       .from(jobApplications)
+      .where(eq(jobApplications.userId, userId))
       .orderBy(asc(jobApplications.order));
     res.json(jobs);
   } catch (error) {
@@ -57,10 +59,11 @@ export async function getAllJobs(_req: Request, res: Response) {
 export async function getJobById(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    const userId = req.user!.sub;
     const [job] = await db
       .select()
       .from(jobApplications)
-      .where(eq(jobApplications.id, id));
+      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)));
 
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
@@ -84,12 +87,16 @@ export async function createJob(req: Request, res: Response) {
     }
 
     const data = validation.data;
+    const userId = req.user!.sub;
 
-    // Get max order for the stage
+    // Get max order for the stage (for this user)
     const existingJobs = await db
       .select()
       .from(jobApplications)
-      .where(eq(jobApplications.stage, (data.stage || "wishlist") as Stage));
+      .where(and(
+        eq(jobApplications.stage, (data.stage || "wishlist") as Stage),
+        eq(jobApplications.userId, userId)
+      ));
 
     const maxOrder = existingJobs.reduce(
       (max, job) => Math.max(max, job.order),
@@ -97,6 +104,7 @@ export async function createJob(req: Request, res: Response) {
     );
 
     const newJob: NewJobApplication = {
+      userId,
       company: data.company,
       position: data.position,
       location: data.location || null,
@@ -120,6 +128,7 @@ export async function createJob(req: Request, res: Response) {
 export async function updateJob(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    const userId = req.user!.sub;
     const validation = updateJobSchema.safeParse(req.body);
 
     if (!validation.success) {
@@ -152,7 +161,7 @@ export async function updateJob(req: Request, res: Response) {
     const [job] = await db
       .update(jobApplications)
       .set(updateData)
-      .where(eq(jobApplications.id, id))
+      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
       .returning();
 
     if (!job) {
@@ -169,9 +178,10 @@ export async function updateJob(req: Request, res: Response) {
 export async function deleteJob(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    const userId = req.user!.sub;
     const [job] = await db
       .delete(jobApplications)
-      .where(eq(jobApplications.id, id))
+      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
       .returning();
 
     if (!job) {
@@ -188,6 +198,7 @@ export async function deleteJob(req: Request, res: Response) {
 export async function updateJobStage(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    const userId = req.user!.sub;
     const { stage, order } = req.body;
 
     if (!stageValues.includes(stage)) {
@@ -201,7 +212,7 @@ export async function updateJobStage(req: Request, res: Response) {
         order: order ?? 0,
         updatedAt: new Date(),
       })
-      .where(eq(jobApplications.id, id))
+      .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
       .returning();
 
     if (!job) {
@@ -217,6 +228,7 @@ export async function updateJobStage(req: Request, res: Response) {
 
 export async function reorderJobs(req: Request, res: Response) {
   try {
+    const userId = req.user!.sub;
     const validation = reorderSchema.safeParse(req.body);
 
     if (!validation.success) {
@@ -227,7 +239,7 @@ export async function reorderJobs(req: Request, res: Response) {
 
     const { jobs } = validation.data;
 
-    // Update all jobs in the batch
+    // Update all jobs in the batch (only user's own jobs)
     const updates = jobs.map(async (job) => {
       return db
         .update(jobApplications)
@@ -236,15 +248,16 @@ export async function reorderJobs(req: Request, res: Response) {
           order: job.order,
           updatedAt: new Date(),
         })
-        .where(eq(jobApplications.id, job.id));
+        .where(and(eq(jobApplications.id, job.id), eq(jobApplications.userId, userId)));
     });
 
     await Promise.all(updates);
 
-    // Return updated jobs
+    // Return updated jobs (only user's)
     const updatedJobs = await db
       .select()
       .from(jobApplications)
+      .where(eq(jobApplications.userId, userId))
       .orderBy(asc(jobApplications.order));
     res.json(updatedJobs);
   } catch (error) {
