@@ -24,6 +24,12 @@ export const test = base.extend({
     }
 
     await use(page);
+
+    // Cleanup: Close any open modals by pressing Escape
+    // This ensures modals left open by tests don't affect subsequent tests
+    await page.keyboard.press("Escape");
+    // Small delay to let modal close animation complete
+    await page.waitForTimeout(100);
   },
 });
 

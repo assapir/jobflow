@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Modal,
   TextInput,
   Button,
   Group,
@@ -14,12 +13,12 @@ import {
   Alert,
   Box,
   Anchor,
-  useMantineColorScheme,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { searchLinkedInJobs, LinkedInSearchError } from "../api/linkedin";
 import type { LinkedInJob, CreateJobInput } from "../types/job";
+import { AppModal, GradientButton, useThemeColors } from "../design-system";
 
 interface LinkedInSearchModalProps {
   opened: boolean;
@@ -33,7 +32,7 @@ export function LinkedInSearchModal({
   onImport,
 }: LinkedInSearchModalProps) {
   const { t } = useTranslation();
-  const { colorScheme } = useMantineColorScheme();
+  const { selectableCardBg, borderColor } = useThemeColors();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [query, setQuery] = useState("");
@@ -135,42 +134,12 @@ export function LinkedInSearchModal({
     }
   };
 
-  const modalHeaderBg =
-    colorScheme === "dark"
-      ? "linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.99) 100%)"
-      : "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
-
-  const modalContentBg =
-    colorScheme === "dark"
-      ? "linear-gradient(180deg, rgba(25, 25, 35, 0.98) 0%, rgba(15, 15, 25, 0.99) 100%)"
-      : "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
-
-  const borderColor =
-    colorScheme === "dark"
-      ? "rgba(255, 255, 255, 0.06)"
-      : "rgba(0, 0, 0, 0.08)";
-
-  const cardBg =
-    colorScheme === "dark"
-      ? "rgba(255, 255, 255, 0.03)"
-      : "rgba(0, 0, 0, 0.02)";
-
   return (
-    <Modal
+    <AppModal
       opened={opened}
       onClose={handleClose}
       title={t("linkedin.searchTitle")}
       size="xl"
-      fullScreen={isMobile}
-      styles={{
-        header: {
-          background: modalHeaderBg,
-          borderBottom: `1px solid ${borderColor}`,
-        },
-        content: {
-          background: modalContentBg,
-        },
-      }}
     >
       <Stack gap="md">
         {/* Search Form */}
@@ -191,15 +160,13 @@ export function LinkedInSearchModal({
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             disabled={loading}
           />
-          <Button
+          <GradientButton
             onClick={handleSearch}
             loading={loading}
             disabled={!query.trim()}
-            variant="gradient"
-            gradient={{ from: "cyan", to: "teal", deg: 135 }}
           >
             {t("linkedin.search")}
-          </Button>
+          </GradientButton>
         </Group>
 
         {/* Error Alert */}
@@ -243,7 +210,7 @@ export function LinkedInSearchModal({
                     padding="sm"
                     withBorder
                     style={{
-                      background: cardBg,
+                      background: selectableCardBg,
                       borderColor: selectedJobs.has(job.url)
                         ? "var(--mantine-color-cyan-6)"
                         : borderColor,
@@ -298,15 +265,13 @@ export function LinkedInSearchModal({
               <Button variant="subtle" onClick={handleClose}>
                 {t("actions.cancel")}
               </Button>
-              <Button
+              <GradientButton
                 onClick={handleImport}
                 loading={importing}
                 disabled={selectedJobs.size === 0}
-                variant="gradient"
-                gradient={{ from: "cyan", to: "teal", deg: 135 }}
               >
                 {t("linkedin.importSelected", { count: selectedJobs.size })}
-              </Button>
+              </GradientButton>
             </Group>
           </>
         )}
@@ -318,6 +283,6 @@ export function LinkedInSearchModal({
           </Box>
         )}
       </Stack>
-    </Modal>
+    </AppModal>
   );
 }

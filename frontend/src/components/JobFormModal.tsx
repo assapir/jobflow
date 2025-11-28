@@ -1,19 +1,18 @@
 import { useEffect } from "react";
 import {
-  Modal,
   TextInput,
   Textarea,
   Select,
   Button,
   Group,
   Stack,
-  useMantineColorScheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import type { JobApplication, CreateJobInput } from "../types/job";
 import { STAGES } from "../types/job";
+import { AppModal, GradientButton } from "../design-system";
 
 interface JobFormModalProps {
   opened: boolean;
@@ -29,8 +28,7 @@ export function JobFormModal({
   job,
 }: JobFormModalProps) {
   const { t } = useTranslation();
-  const { colorScheme } = useMantineColorScheme();
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const form = useForm<CreateJobInput>({
     initialValues: {
@@ -86,37 +84,12 @@ export function JobFormModal({
     label: t(`stages.${stage}`),
   }));
 
-  const modalHeaderBg =
-    colorScheme === "dark"
-      ? "linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.99) 100%)"
-      : "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
-
-  const modalContentBg =
-    colorScheme === "dark"
-      ? "linear-gradient(180deg, rgba(25, 25, 35, 0.98) 0%, rgba(15, 15, 25, 0.99) 100%)"
-      : "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.99) 100%)";
-
-  const borderColor =
-    colorScheme === "dark"
-      ? "rgba(255, 255, 255, 0.06)"
-      : "rgba(0, 0, 0, 0.08)";
-
   return (
-    <Modal
+    <AppModal
       opened={opened}
       onClose={onClose}
       title={job ? t("actions.edit") : t("actions.add")}
       size="lg"
-      fullScreen={isMobile}
-      styles={{
-        header: {
-          background: modalHeaderBg,
-          borderBottom: `1px solid ${borderColor}`,
-        },
-        content: {
-          background: modalContentBg,
-        },
-      }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
@@ -192,10 +165,10 @@ export function JobFormModal({
             <Button variant="subtle" onClick={onClose}>
               {t("actions.cancel")}
             </Button>
-            <Button type="submit">{t("actions.save")}</Button>
+            <GradientButton type="submit">{t("actions.save")}</GradientButton>
           </Group>
         </Stack>
       </form>
-    </Modal>
+    </AppModal>
   );
 }

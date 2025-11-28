@@ -1,8 +1,9 @@
-import { Text, Stack, Group, Badge, Box, useMantineColorScheme } from '@mantine/core';
-import { Droppable } from '@hello-pangea/dnd';
-import { useTranslation } from 'react-i18next';
-import type { JobApplication, Stage } from '../types/job';
-import { JobCard } from './JobCard';
+import { Text, Stack, Group, Badge, Box } from "@mantine/core";
+import { Droppable } from "@hello-pangea/dnd";
+import { useTranslation } from "react-i18next";
+import type { JobApplication, Stage } from "../types/job";
+import { JobCard } from "./JobCard";
+import { useThemeColors, stageColors } from "../design-system";
 
 interface KanbanColumnProps {
   stage: Stage;
@@ -11,40 +12,25 @@ interface KanbanColumnProps {
   onDeleteJob: (job: JobApplication) => void;
 }
 
-const stageColors: Record<Stage, string> = {
-  wishlist: 'gray',
-  applied: 'blue',
-  phone_screen: 'violet',
-  interview: 'orange',
-  offer: 'green',
-  rejected: 'red',
-};
-
-export function KanbanColumn({ stage, jobs, onEditJob, onDeleteJob }: KanbanColumnProps) {
+export function KanbanColumn({
+  stage,
+  jobs,
+  onEditJob,
+  onDeleteJob,
+}: KanbanColumnProps) {
   const { t } = useTranslation();
-  const { colorScheme } = useMantineColorScheme();
-
-  const columnBg = colorScheme === 'dark'
-    ? 'linear-gradient(180deg, rgba(25, 25, 35, 0.95) 0%, rgba(15, 15, 25, 0.98) 100%)'
-    : 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.98) 100%)';
-
-  const borderColor = colorScheme === 'dark'
-    ? 'rgba(255, 255, 255, 0.06)'
-    : 'rgba(0, 0, 0, 0.08)';
-
-  const emptyBorderColor = colorScheme === 'dark'
-    ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.1)';
+  const { surfaceBg, borderColor, emptyBorderColor, dragOverBg } =
+    useThemeColors();
 
   return (
     <Box
       style={{
         width: 300,
         minWidth: 300,
-        maxHeight: 'calc(100vh - 160px)',
-        display: 'flex',
-        flexDirection: 'column',
-        background: columnBg,
+        maxHeight: "calc(100vh - 160px)",
+        display: "flex",
+        flexDirection: "column",
+        background: surfaceBg,
         border: `1px solid ${borderColor}`,
         borderRadius: 12,
         padding: 16,
@@ -68,14 +54,14 @@ export function KanbanColumn({ stage, jobs, onEditJob, onDeleteJob }: KanbanColu
             {...provided.droppableProps}
             style={{
               flex: 1,
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              overflowY: "auto",
+              overflowX: "hidden",
               padding: 4,
               borderRadius: 8,
-              transition: 'background-color 0.2s ease',
+              transition: "background-color 0.2s ease",
               backgroundColor: snapshot.isDraggingOver
-                ? 'rgba(0, 212, 236, 0.08)'
-                : 'transparent',
+                ? dragOverBg
+                : "transparent",
             }}
           >
             {jobs.length === 0 ? (
@@ -90,7 +76,9 @@ export function KanbanColumn({ stage, jobs, onEditJob, onDeleteJob }: KanbanColu
                 }}
               >
                 <Text size="xs" c="dimmed">
-                  {snapshot.isDraggingOver ? t('empty.dropHere') : t('empty.noJobs')}
+                  {snapshot.isDraggingOver
+                    ? t("empty.dropHere")
+                    : t("empty.noJobs")}
                 </Text>
               </Stack>
             ) : (
