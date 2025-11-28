@@ -80,10 +80,19 @@ jobs:
             git reset --hard origin/main
 
             echo "🔨 Building containers..."
-            docker compose -f docker-compose.prod.yml build --no-cache
+            docker compose -f docker-compose.prod.yml build
 
-            echo "🔄 Restarting services..."
-            docker compose -f docker-compose.prod.yml up -d --force-recreate
+            echo "🗄️ Starting database..."
+            docker compose -f docker-compose.prod.yml up -d postgres
+            
+            echo "⏳ Waiting for database to be ready..."
+            sleep 5
+
+            echo "🗄️ Running database migrations..."
+            docker compose -f docker-compose.prod.yml run --rm db-migrate
+
+            echo "🔄 Starting all services..."
+            docker compose -f docker-compose.prod.yml up -d
 
             echo "🧹 Cleaning up old images..."
             docker image prune -f
