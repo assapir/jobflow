@@ -44,7 +44,9 @@ export async function searchJobs(
     headless: true,
     launchContext: {
       launchOptions: {
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        // Use system Chromium if available (for Alpine/ARM64)
+        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
       },
     },
     async requestHandler({ page, log }) {

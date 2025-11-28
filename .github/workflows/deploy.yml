@@ -1,0 +1,97 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Run backend linting
+        run: npm run lint
+        working-directory: backend
+
+      - name: Run backend tests
+        run: npm test
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run frontend linting
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Run frontend tests
+        run: npm test -- --run
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      - name: Build backend
+        run: npm run build
+        working-directory: backend
+
+  deploy:
+    name: Deploy to Pi
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PI_HOST }}
+          port: ${{ secrets.PI_PORT }}
+          username: ${{ secrets.PI_USER }}
+          key: ${{ secrets.PI_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "🚀 Starting deployment..."
+            cd /opt/jobflow
+
+            echo "📥 Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "🔨 Building containers..."
+            docker compose -f docker-compose.prod.yml build --no-cache
+
+            echo "🗄️ Running database migrations..."
+            docker compose -f docker-compose.prod.yml run --rm backend npm run db:migrate
+
+            echo "🔄 Restarting services..."
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+
+            echo "✅ Deployment complete!"
+
+            # Show running containers
+            docker compose -f docker-compose.prod.yml ps
