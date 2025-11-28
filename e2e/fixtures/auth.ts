@@ -9,7 +9,7 @@ export const test = base.extend({
     // Navigate to the app
     await page.goto("/");
 
-    // Wait for either the Add button (authenticated) or login page to load
+    // Wait for the page to load
     await page.waitForLoadState("networkidle");
 
     // Check if we see the login page (Dev Login button)
@@ -19,27 +19,41 @@ export const test = base.extend({
     if (isLoginPage) {
       await devLoginButton.click();
 
-      // Wait for either the Add button (no onboarding) or the onboarding modal
+      // Wait for navigation and network to settle
       await page.waitForLoadState("networkidle");
 
-      // Check if onboarding modal appeared
+      // Give time for the profile to load and modal to render
+      await page.waitForTimeout(500);
+
+      // Check if onboarding modal appeared - wait a bit for it to show up
       const onboardingModal = page.getByRole("dialog");
-      const isOnboardingVisible = await onboardingModal.isVisible().catch(() => false);
 
-      if (isOnboardingVisible) {
-        // Skip onboarding for regular tests
+      try {
+        // Wait for up to 3 seconds for the modal to appear
+        await onboardingModal.waitFor({ state: "visible", timeout: 3000 });
+
+        // Modal appeared - find and click the skip button
         const skipButton = page.getByRole("button", { name: /skip for now/i });
-        if (await skipButton.isVisible().catch(() => false)) {
-          await skipButton.click();
-          // Wait for modal to close
-          await expect(onboardingModal).not.toBeVisible({ timeout: 5000 });
-        }
+        await skipButton.waitFor({ state: "visible", timeout: 2000 });
+        await skipButton.click();
 
-        // Dismiss the banner if it appears
-        const bannerCloseButton = page.locator(".mantine-CloseButton-root").first();
-        if (await bannerCloseButton.isVisible().catch(() => false)) {
-          await bannerCloseButton.click();
-        }
+        // Wait for modal to close
+        await expect(onboardingModal).not.toBeVisible({ timeout: 5000 });
+      } catch {
+        // Modal didn't appear or couldn't find skip button - that's fine
+        // User might already have completed onboarding
+      }
+
+      // Dismiss the banner if it appears (after modal is closed)
+      await page.waitForTimeout(300);
+      const bannerCloseButton = page
+        .locator('[aria-label="Close"]')
+        .or(page.locator(".mantine-CloseButton-root"))
+        .first();
+      const bannerVisible = await bannerCloseButton.isVisible().catch(() => false);
+      if (bannerVisible) {
+        await bannerCloseButton.click();
+        await page.waitForTimeout(200);
       }
 
       // Wait for the Add button to appear (authenticated state)
