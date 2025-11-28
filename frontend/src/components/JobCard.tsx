@@ -102,7 +102,13 @@ export function JobCard({ job, index, onEdit, onDelete }: JobCardProps) {
                   <Menu.Item onClick={() => onEdit(job)}>
                     {t("actions.edit")}
                   </Menu.Item>
-                  <Menu.Item color="red" onClick={() => onDelete(job)}>
+                  <Menu.Item
+                    color="red"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(job);
+                    }}
+                  >
                     {t("actions.delete")}
                   </Menu.Item>
                 </Menu.Dropdown>
