@@ -13,7 +13,11 @@ services:
       - frontend_build:/srv/frontend:ro
       - caddy_data:/data
       - caddy_config:/config
-      - caddy_logs:/var/log/caddy
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "10"
     environment:
       - ACME_EMAIL=${ACME_EMAIL:-assaf@sapir.io}
     depends_on:
@@ -32,6 +36,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
+      - LOG_LEVEL=info
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-jobflow}
       - JWT_SECRET=${JWT_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
@@ -39,6 +44,11 @@ services:
       - LINKEDIN_CLIENT_ID=${LINKEDIN_CLIENT_ID}
       - LINKEDIN_CLIENT_SECRET=${LINKEDIN_CLIENT_SECRET}
       - LINKEDIN_REDIRECT_URI=https://jobflow.sapir.io/api/auth/linkedin/callback
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "10"
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,7 +105,6 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
-  caddy_logs:
   frontend_build:
 
 networks:

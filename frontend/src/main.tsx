@@ -10,6 +10,7 @@ import "./i18n";
 import App from "./App";
 import { theme } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
+import { ErrorBoundary } from "./components";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,10 +27,12 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <DirectionProvider initialDirection="ltr">
           <MantineProvider theme={theme} defaultColorScheme="dark">
-            <AuthProvider>
-              <Notifications position="top-right" />
-              <App />
-            </AuthProvider>
+            <ErrorBoundary>
+              <AuthProvider>
+                <Notifications position="top-right" />
+                <App />
+              </AuthProvider>
+            </ErrorBoundary>
           </MantineProvider>
         </DirectionProvider>
       </QueryClientProvider>

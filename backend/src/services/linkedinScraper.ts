@@ -1,4 +1,5 @@
 import { PlaywrightCrawler } from "crawlee";
+import logger from "../lib/logger.js";
 
 export interface LinkedInJob {
   title: string;
@@ -117,7 +118,7 @@ export async function searchJobs(
   try {
     await crawler.run([searchUrl]);
   } catch (error) {
-    console.error("Crawler error:", error);
+    logger.error({ err: error, query, location }, "LinkedIn crawler error");
     throw new Error("Failed to search LinkedIn jobs");
   }
 

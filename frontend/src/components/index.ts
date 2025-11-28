@@ -11,3 +11,4 @@ export { LoginPage } from "./LoginPage";
 export { AuthCallback } from "./AuthCallback";
 export { OnboardingModal } from "./OnboardingModal";
 export { OnboardingBanner } from "./OnboardingBanner";
+export { ErrorBoundary } from "./ErrorBoundary";
