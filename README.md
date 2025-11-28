@@ -173,46 +173,50 @@ Internet → Router (80/443) → Raspberry Pi (Caddy) → Docker containers
 
 ### Stack
 
-| Component | Technology |
-|-----------|------------|
+| Component     | Technology                                |
+| ------------- | ----------------------------------------- |
 | Reverse Proxy | Caddy (automatic HTTPS via Let's Encrypt) |
-| Backend | Node.js 22 on Alpine Linux |
-| Database | PostgreSQL 16 |
-| Frontend | Static files served by Caddy |
-| CI/CD | GitHub Actions |
+| Backend       | Node.js 22 on Alpine Linux                |
+| Database      | PostgreSQL 16                             |
+| Frontend      | Static files served by Caddy              |
+| CI/CD         | GitHub Actions                            |
 
 ### Deployment Files
 
-| File | Purpose |
-|------|---------|
-| `docker-compose.prod.yml` | Production container orchestration |
-| `Caddyfile` | HTTPS reverse proxy configuration |
-| `backend/Dockerfile` | Backend image with Playwright for LinkedIn scraping |
-| `frontend/Dockerfile` | Frontend static build |
-| `.github/workflows/deploy.yml` | CI/CD pipeline |
-| `.env.example` | Environment variables template |
+| File                           | Purpose                                             |
+| ------------------------------ | --------------------------------------------------- |
+| `docker-compose.prod.yml`      | Production container orchestration                  |
+| `Caddyfile`                    | HTTPS reverse proxy configuration                   |
+| `backend/Dockerfile`           | Backend image with Playwright for LinkedIn scraping |
+| `frontend/Dockerfile`          | Frontend static build                               |
+| `.github/workflows/deploy.yml` | CI/CD pipeline                                      |
+| `.env.example`                 | Environment variables template                      |
 
 ### Initial Server Setup
 
 1. **Install Docker** on your server:
+
    ```bash
    curl -fsSL https://get.docker.com | sh
    sudo usermod -aG docker $USER
    ```
 
 2. **Clone the repository**:
+
    ```bash
    git clone git@github.com:YOUR_USER/jobflow.git /opt/jobflow
    cd /opt/jobflow
    ```
 
 3. **Create production `.env`**:
+
    ```bash
    cp .env.example .env
    nano .env
    ```
-   
+
    Generate secrets with:
+
    ```bash
    openssl rand -base64 64  # For JWT_SECRET
    openssl rand -base64 64  # For REFRESH_TOKEN_SECRET
@@ -240,14 +244,15 @@ The repository includes a GitHub Actions workflow that automatically deploys on 
 
 **Required GitHub Secrets:**
 
-| Secret | Description |
-|--------|-------------|
-| `PI_HOST` | Server IP address |
-| `PI_PORT` | SSH port |
-| `PI_USER` | SSH username |
-| `PI_SSH_KEY` | SSH private key |
+| Secret       | Description       |
+| ------------ | ----------------- |
+| `PI_HOST`    | Server IP address |
+| `PI_PORT`    | SSH port          |
+| `PI_USER`    | SSH username      |
+| `PI_SSH_KEY` | SSH private key   |
 
 Add secrets via GitHub CLI:
+
 ```bash
 gh secret set PI_HOST
 gh secret set PI_PORT
@@ -258,16 +263,19 @@ gh secret set PI_SSH_KEY < ~/.ssh/your_deploy_key
 ### Manual Operations
 
 **Run database migrations:**
+
 ```bash
 docker compose -f docker-compose.prod.yml run --rm db-migrate
 ```
 
 **View logs:**
+
 ```bash
 docker compose -f docker-compose.prod.yml logs -f
 ```
 
 **Restart services:**
+
 ```bash
 docker compose -f docker-compose.prod.yml restart
 ```
