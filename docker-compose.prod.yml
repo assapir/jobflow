@@ -75,6 +75,22 @@ services:
       - frontend_build:/output
     command: ["sh", "-c", "cp -r /app/dist/* /output/"]
 
+  # Database migration container (runs once to apply migrations)
+  db-migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: jobflow-db-migrate
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-jobflow}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - jobflow-network
+    command: ["npm", "run", "db:migrate"]
+
 volumes:
   postgres_data:
   caddy_data:
