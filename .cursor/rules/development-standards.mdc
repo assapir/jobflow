@@ -9,6 +9,7 @@ alwaysApply: true
 ## Security First
 
 Security is the most important feature. Always prioritize security in all development decisions:
+
 - Never expose sensitive data (API keys, tokens, credentials) in code or logs
 - Validate and sanitize all user inputs
 - Use parameterized queries to prevent SQL injection
@@ -19,11 +20,30 @@ Security is the most important feature. Always prioritize security in all develo
 ## Testing Requirements
 
 All code must be tested. Testing priority (highest to lowest):
+
 1. **Unit Tests** (required) - Every function/component should have unit tests
 2. **Integration Tests** (preferred) - Test interactions between modules
 3. **E2E Tests** (consider) - For critical user flows and complex features
 
 When adding new features or fixing bugs:
+
 - Write unit tests at minimum
 - Add integration tests for API endpoints and database operations
 - Consider E2E tests for user-facing features
+
+## Design System Usage
+
+Always use the design system (`frontend/src/design-system/`) for UI development:
+
+- **Use existing tokens** - Import colors, gradients, borders, and shadows from `tokens.ts`
+- **Use `useThemeColors` hook** - Never use `useMantineColorScheme` directly with repeated ternary logic
+- **Use design system components** - Use `AppModal`, `GradientButton` instead of raw Mantine equivalents
+- **Use Tabler icons** - Import from `@tabler/icons-react`, never add inline SVGs
+
+When you need new styling:
+
+1. First check if it already exists in the design system
+2. If not, add it as a new token, variant, or component in the design system
+3. Then import and use it from the design system
+
+Never add one-off styles or duplicate existing patterns. Keep UI consistent by extending the design system.

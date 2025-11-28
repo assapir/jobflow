@@ -129,9 +129,7 @@ export const NoFullScreenOnMobile: Story = {
     title: "Compact Modal",
     size: "sm",
     fullScreenOnMobile: false,
-    children: (
-      <Text>This modal won't go fullscreen on mobile devices.</Text>
-    ),
+    children: <Text>This modal won't go fullscreen on mobile devices.</Text>,
   },
 };
 
@@ -155,6 +153,5 @@ export const Interactive: Story = {
   args: {
     opened: false,
     onClose: () => {},
-    children: null,
   },
 };

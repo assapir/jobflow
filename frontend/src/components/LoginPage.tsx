@@ -7,11 +7,12 @@ import {
   Text,
   Title,
   Paper,
-  useMantineColorScheme,
   Alert,
   Divider,
 } from "@mantine/core";
+import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useAuth } from "../context/AuthContext";
+import { useThemeColors } from "../design-system";
 
 interface LoginPageProps {
   error?: string | null;
@@ -37,13 +38,8 @@ const loginText = {
 
 export function LoginPage({ error }: LoginPageProps) {
   const { login, devLogin, isLoading, authStatus } = useAuth();
-  const { colorScheme } = useMantineColorScheme();
+  const { pageBg, paperBg } = useThemeColors();
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  const bgGradient =
-    colorScheme === "dark"
-      ? "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)"
-      : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%)";
 
   const handleLogin = async () => {
     try {
@@ -92,7 +88,7 @@ export function LoginPage({ error }: LoginPageProps) {
     <Box
       style={{
         minHeight: "100vh",
-        background: bgGradient,
+        background: pageBg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -106,10 +102,7 @@ export function LoginPage({ error }: LoginPageProps) {
           style={{
             maxWidth: 400,
             width: "100%",
-            background:
-              colorScheme === "dark"
-                ? "rgba(26, 26, 46, 0.9)"
-                : "rgba(255, 255, 255, 0.95)",
+            background: paperBg,
             backdropFilter: "blur(10px)",
           }}
         >
@@ -140,17 +133,7 @@ export function LoginPage({ error }: LoginPageProps) {
                   fullWidth
                   onClick={handleLogin}
                   loading={isLoading}
-                  leftSection={
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                    </svg>
-                  }
+                  leftSection={<IconBrandLinkedin size={20} />}
                   styles={{
                     root: {
                       backgroundColor: "#0077B5",

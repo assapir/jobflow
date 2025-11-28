@@ -1,34 +1,37 @@
 import { Modal, type ModalProps } from "@mantine/core";
-import type { ReactNode } from "react";
+import { useMediaQuery } from "@mantine/hooks";
+import { useThemeColors } from "../hooks/useThemeColors";
 
-export interface AppModalProps extends Omit<ModalProps, "children"> {
-  /** Modal content */
-  children: ReactNode;
-  /** Whether to go fullscreen on mobile (default: true) */
+export interface AppModalProps extends Omit<ModalProps, "styles"> {
+  /** Enable fullscreen on mobile devices (default: true) */
   fullScreenOnMobile?: boolean;
 }
 
 /**
- * App-wide modal component with consistent theming.
- * Wraps Mantine Modal with default styling for the Jobo app.
+ * Pre-styled Modal component with consistent theming.
+ * Automatically applies theme-aware background gradients and borders.
  */
 export function AppModal({
-  children,
   fullScreenOnMobile = true,
+  children,
   ...props
 }: AppModalProps) {
+  const { modalHeaderBg, modalContentBg, borderColor } = useThemeColors();
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   return (
     <Modal
-      {...props}
-      fullScreen={fullScreenOnMobile ? undefined : false}
+      fullScreen={fullScreenOnMobile && isMobile}
       styles={{
         header: {
-          borderBottom: "1px solid var(--mantine-color-dark-4)",
+          background: modalHeaderBg,
+          borderBottom: `1px solid ${borderColor}`,
         },
-        title: {
-          fontWeight: 600,
+        content: {
+          background: modalContentBg,
         },
       }}
+      {...props}
     >
       {children}
     </Modal>
