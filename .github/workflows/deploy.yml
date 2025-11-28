@@ -84,7 +84,7 @@ jobs:
 
             echo "🗄️ Starting database..."
             docker compose -f docker-compose.prod.yml up -d postgres
-            
+
             echo "⏳ Waiting for database to be ready..."
             sleep 5
 
