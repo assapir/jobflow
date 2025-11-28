@@ -65,6 +65,28 @@ vi.mock("@mantine/hooks", async () => {
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 
+// Helper to create mock Response with headers
+export function createMockResponse(options: {
+  ok: boolean;
+  json?: unknown;
+  status?: number;
+  requestId?: string;
+}) {
+  return {
+    ok: options.ok,
+    status: options.status ?? (options.ok ? 200 : 500),
+    headers: {
+      get: (name: string) => {
+        if (name.toLowerCase() === "x-request-id") {
+          return options.requestId ?? "mock-request-id";
+        }
+        return null;
+      },
+    },
+    json: () => Promise.resolve(options.json),
+  };
+}
+
 // Reset mocks before each test
 beforeEach(() => {
   mockFetch.mockReset();

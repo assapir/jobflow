@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mockFetch } from "../test/setup";
+import { mockFetch, createMockResponse } from "../test/setup";
 import {
   fetchJobs,
   fetchJob,
@@ -45,10 +45,9 @@ describe("jobs API", () => {
   describe("fetchJobs", () => {
     it("should fetch all jobs successfully", async () => {
       const jobs = [mockJob];
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(jobs),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: jobs })
+      );
 
       const result = await fetchJobs();
 
@@ -57,10 +56,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error when fetch fails", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Server error" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Server error" } })
+      );
 
       await expect(fetchJobs()).rejects.toThrow("Server error");
     });
@@ -68,6 +66,7 @@ describe("jobs API", () => {
     it("should handle unknown error format", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
+        headers: { get: () => null },
         json: () => Promise.reject(new Error("Parse error")),
       });
 
@@ -77,10 +76,9 @@ describe("jobs API", () => {
 
   describe("fetchJob", () => {
     it("should fetch a single job by id", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockJob),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: mockJob })
+      );
 
       const result = await fetchJob("123e4567-e89b-12d3-a456-426614174000");
 
@@ -92,10 +90,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error when job not found", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Job not found" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Job not found" } })
+      );
 
       await expect(fetchJob("nonexistent")).rejects.toThrow("Job not found");
     });
@@ -109,10 +106,9 @@ describe("jobs API", () => {
         stage: "wishlist",
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ ...mockJob, ...newJobInput }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: { ...mockJob, ...newJobInput } })
+      );
 
       const result = await createJob(newJobInput);
 
@@ -127,10 +123,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error on validation failure", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Validation failed" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Validation failed" } })
+      );
 
       await expect(createJob({ company: "", position: "" })).rejects.toThrow(
         "Validation failed"
@@ -142,10 +137,9 @@ describe("jobs API", () => {
     it("should update an existing job", async () => {
       const updateData = { company: "Updated Company" };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ ...mockJob, ...updateData }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: { ...mockJob, ...updateData } })
+      );
 
       const result = await updateJob(mockJob.id, updateData);
 
@@ -160,10 +154,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error when job not found", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Job not found" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Job not found" } })
+      );
 
       await expect(
         updateJob("nonexistent", { company: "Test" })
@@ -173,10 +166,9 @@ describe("jobs API", () => {
 
   describe("deleteJob", () => {
     it("should delete a job", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ message: "Job deleted" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: { message: "Job deleted" } })
+      );
 
       await expect(deleteJob(mockJob.id)).resolves.toBeUndefined();
 
@@ -189,10 +181,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error when job not found", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Job not found" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Job not found" } })
+      );
 
       await expect(deleteJob("nonexistent")).rejects.toThrow("Job not found");
     });
@@ -202,10 +193,9 @@ describe("jobs API", () => {
     it("should update job stage and order", async () => {
       const updatedJob = { ...mockJob, stage: "interview" as const, order: 1 };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(updatedJob),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: updatedJob })
+      );
 
       const result = await updateJobStage(mockJob.id, "interview", 1);
 
@@ -221,10 +211,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error on invalid stage", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Invalid stage" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Invalid stage" } })
+      );
 
       await expect(
         updateJobStage(mockJob.id, "invalid_stage", 0)
@@ -243,10 +232,9 @@ describe("jobs API", () => {
 
       const updatedJobs = [mockJob, { ...mockJob, id: "other-id", order: 1 }];
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(updatedJobs),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: true, json: updatedJobs })
+      );
 
       const result = await reorderJobs(reorderData);
 
@@ -261,10 +249,9 @@ describe("jobs API", () => {
     });
 
     it("should throw error on validation failure", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Validation failed" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({ ok: false, json: { error: "Validation failed" } })
+      );
 
       await expect(reorderJobs({ jobs: [] })).rejects.toThrow(
         "Validation failed"
