@@ -1,0 +1,47 @@
+# Caddy configuration for jobflow.sapir.io
+# Automatic HTTPS via Let's Encrypt
+
+{
+    # Email for Let's Encrypt notifications
+    email {$ACME_EMAIL:assaf@sapir.io}
+}
+
+jobflow.sapir.io {
+    # API requests -> backend container
+    handle /api/* {
+        reverse_proxy backend:3002
+    }
+
+    # Everything else -> static frontend files
+    handle {
+        root * /srv/frontend
+
+        # Enable compression
+        encode gzip zstd
+
+        # SPA routing: serve index.html for any non-file routes
+        try_files {path} /index.html
+
+        file_server
+    }
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent clickjacking
+        X-Frame-Options "DENY"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Referrer policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
