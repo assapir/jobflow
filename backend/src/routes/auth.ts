@@ -7,6 +7,8 @@ import {
   logout,
   getAuthStatus,
   devLogin,
+  getProfile,
+  updateProfile,
 } from "../controllers/auth.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -29,6 +31,12 @@ router.post("/refresh", refreshAccessToken);
 
 // Get current user (protected)
 router.get("/me", requireAuth, getCurrentUser);
+
+// Get user profile with onboarding data (protected)
+router.get("/profile", requireAuth, getProfile);
+
+// Update user profile (protected)
+router.patch("/profile", requireAuth, updateProfile);
 
 // Logout
 router.post("/logout", logout);

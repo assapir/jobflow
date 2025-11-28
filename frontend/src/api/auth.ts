@@ -1,4 +1,10 @@
-import type { User, AuthResponse } from "../types/user";
+import type {
+  User,
+  AuthResponse,
+  ProfileResponse,
+  Profession,
+  ExperienceLevel,
+} from "../types/user";
 
 const API_BASE = "/api/auth";
 
@@ -101,4 +107,53 @@ export async function logout(): Promise<void> {
     method: "POST",
     credentials: "include",
   });
+}
+
+/**
+ * Get user profile with onboarding data
+ */
+export async function getProfile(accessToken: string): Promise<ProfileResponse> {
+  const response = await fetch(`${API_BASE}/profile`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get profile");
+  }
+
+  return response.json();
+}
+
+export interface UpdateProfileInput {
+  profession?: Profession | null;
+  experienceLevel?: ExperienceLevel | null;
+  preferredLocation?: string | null;
+  onboardingCompleted?: boolean;
+}
+
+/**
+ * Update user profile
+ */
+export async function updateProfile(
+  accessToken: string,
+  data: UpdateProfileInput
+): Promise<ProfileResponse> {
+  const response = await fetch(`${API_BASE}/profile`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update profile");
+  }
+
+  return response.json();
 }

@@ -6,27 +6,34 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { User } from "../types/user";
+import type { User, UserProfile } from "../types/user";
 import {
   getLinkedInAuthUrl,
   refreshToken,
   logout as apiLogout,
   getAuthStatus,
   devLogin as apiDevLogin,
+  getProfile as apiGetProfile,
+  updateProfile as apiUpdateProfile,
   type AuthStatus,
+  type UpdateProfileInput,
 } from "../api/auth";
 
 interface AuthContextType {
   user: User | null;
+  profile: UserProfile | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isProfileLoading: boolean;
   authStatus: AuthStatus | null;
   login: () => Promise<void>;
   devLogin: () => Promise<void>;
   logout: () => Promise<void>;
   setAuthFromCallback: (token: string) => Promise<void>;
   getAccessToken: () => string | null;
+  fetchProfile: () => Promise<void>;
+  updateProfile: (data: UpdateProfileInput) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -45,8 +52,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
 
   const isAuthenticated = !!user && !!accessToken;
@@ -115,8 +124,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setAccessToken(null);
       setUser(null);
+      setProfile(null);
     }
   }, []);
+
+  const fetchProfile = useCallback(async () => {
+    if (!accessToken) return;
+
+    setIsProfileLoading(true);
+    try {
+      const response = await apiGetProfile(accessToken);
+      setUser(response.user);
+      setProfile(response.profile);
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  }, [accessToken]);
+
+  const updateProfileFn = useCallback(
+    async (data: UpdateProfileInput) => {
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const response = await apiUpdateProfile(accessToken, data);
+      setUser(response.user);
+      setProfile(response.profile);
+    },
+    [accessToken]
+  );
 
   const setAuthFromCallback = useCallback(async (token: string) => {
     setAccessToken(token);
@@ -138,15 +174,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     <AuthContext.Provider
       value={{
         user,
+        profile,
         accessToken,
         isAuthenticated,
         isLoading,
+        isProfileLoading,
         authStatus,
         login,
         devLogin,
         logout,
         setAuthFromCallback,
         getAccessToken,
+        fetchProfile,
+        updateProfile: updateProfileFn,
       }}
     >
       {children}

@@ -22,10 +22,13 @@ import {
   LinkedInSearchModal,
   LoginPage,
   AuthCallback,
+  OnboardingModal,
+  OnboardingBanner,
 } from "./components";
 import { useAuth } from "./context/AuthContext";
 import { setAccessTokenGetter } from "./api/client";
 import type { JobApplication, CreateJobInput } from "./types/job";
+import type { Profession, ExperienceLevel } from "./types/user";
 
 export default function App() {
   const { i18n } = useTranslation();
@@ -36,9 +39,14 @@ export default function App() {
     isLoading: authLoading,
     getAccessToken,
     user,
+    profile,
+    fetchProfile,
+    updateProfile,
   } = useAuth();
   const [isCallback, setIsCallback] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   // Connect the access token getter to the API client
   useEffect(() => {
@@ -64,6 +72,20 @@ export default function App() {
     setDirection(isRTL ? "rtl" : "ltr");
     document.documentElement.dir = isRTL ? "rtl" : "ltr";
   }, [i18n.language, setDirection]);
+
+  // Fetch profile when authenticated
+  useEffect(() => {
+    if (isAuthenticated && !profile) {
+      fetchProfile();
+    }
+  }, [isAuthenticated, profile, fetchProfile]);
+
+  // Show onboarding modal if profile is not completed
+  useEffect(() => {
+    if (profile && !profile.onboardingCompleted && !bannerDismissed) {
+      setShowOnboardingModal(true);
+    }
+  }, [profile, bannerDismissed]);
 
   const {
     jobs,
@@ -125,6 +147,31 @@ export default function App() {
     for (const job of jobs) {
       await addJob(job);
     }
+  };
+
+  const handleOnboardingComplete = async (data: {
+    profession: Profession | null;
+    experienceLevel: ExperienceLevel | null;
+    preferredLocation: string | null;
+  }) => {
+    await updateProfile({
+      ...data,
+      onboardingCompleted: true,
+    });
+    setShowOnboardingModal(false);
+  };
+
+  const handleOnboardingSkip = () => {
+    setShowOnboardingModal(false);
+    setBannerDismissed(false); // Show banner after skipping
+  };
+
+  const handleBannerComplete = () => {
+    setShowOnboardingModal(true);
+  };
+
+  const handleBannerDismiss = () => {
+    setBannerDismissed(true);
   };
 
   const handleCallbackComplete = useCallback(() => {
@@ -218,6 +265,14 @@ export default function App() {
       />
 
       <Box p="md" style={{ flex: 1 }}>
+        {/* Onboarding banner - show if not completed and modal was dismissed */}
+        {profile && !profile.onboardingCompleted && !showOnboardingModal && !bannerDismissed && (
+          <OnboardingBanner
+            onComplete={handleBannerComplete}
+            onDismiss={handleBannerDismiss}
+          />
+        )}
+
         <KanbanBoard
           jobs={jobs}
           getJobsByStage={getJobsByStage}
@@ -246,6 +301,15 @@ export default function App() {
         opened={linkedInModalOpened}
         onClose={closeLinkedInModal}
         onImport={handleLinkedInImport}
+        profile={profile}
+      />
+
+      <OnboardingModal
+        opened={showOnboardingModal}
+        onClose={handleOnboardingSkip}
+        onComplete={handleOnboardingComplete}
+        user={user}
+        profile={profile}
       />
 
       <Footer />

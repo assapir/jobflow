@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TextInput,
   Button,
@@ -18,31 +18,71 @@ import { useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { searchLinkedInJobs, LinkedInSearchError } from "../api/linkedin";
 import type { LinkedInJob, CreateJobInput } from "../types/job";
+import type { UserProfile, Profession } from "../types/user";
 import { AppModal, GradientButton, useThemeColors } from "../design-system";
+
+// Mapping from profession to search keywords
+const PROFESSION_KEYWORDS: Record<Profession, string> = {
+  engineering: "Software Engineer",
+  product: "Product Manager",
+  design: "UX Designer",
+  marketing: "Marketing Manager",
+  sales: "Sales Representative",
+  operations: "Operations Manager",
+  hr: "HR Manager",
+  finance: "Financial Analyst",
+  other: "",
+};
 
 interface LinkedInSearchModalProps {
   opened: boolean;
   onClose: () => void;
   onImport: (jobs: CreateJobInput[]) => Promise<void>;
+  profile?: UserProfile | null;
 }
 
 export function LinkedInSearchModal({
   opened,
   onClose,
   onImport,
+  profile,
 }: LinkedInSearchModalProps) {
   const { t } = useTranslation();
   const { selectableCardBg, borderColor } = useThemeColors();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("");
+  // Get initial values from profile
+  const getInitialQuery = () => {
+    if (profile?.profession) {
+      return PROFESSION_KEYWORDS[profile.profession] || "";
+    }
+    return "";
+  };
+
+  const getInitialLocation = () => {
+    return profile?.preferredLocation || "";
+  };
+
+  const [query, setQuery] = useState(getInitialQuery);
+  const [location, setLocation] = useState(getInitialLocation);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<LinkedInJob[]>([]);
   const [selectedJobs, setSelectedJobs] = useState<Set<string>>(new Set());
   const [importing, setImporting] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  // Update defaults when modal opens and profile changes
+  useEffect(() => {
+    if (opened && !hasSearched) {
+      if (profile?.profession && !query) {
+        setQuery(PROFESSION_KEYWORDS[profile.profession] || "");
+      }
+      if (profile?.preferredLocation && !location) {
+        setLocation(profile.preferredLocation);
+      }
+    }
+  }, [opened, profile, hasSearched, query, location]);
 
   const handleSearch = async () => {
     if (!query.trim()) return;

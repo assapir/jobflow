@@ -7,6 +7,70 @@
   "auth": {
     "logout": "Sign out"
   },
+  "onboarding": {
+    "title": "Complete Your Profile",
+    "step": "Step {{current}} of {{total}}",
+    "skip": "Skip for now",
+    "back": "Back",
+    "next": "Next",
+    "complete": "Complete Setup",
+    "welcome": {
+      "title": "Welcome, {{name}}!",
+      "subtitle": "Let's set up your profile to help you find the perfect job faster.",
+      "name": "Name",
+      "email": "Email",
+      "country": "Country"
+    },
+    "profession": {
+      "title": "What's your profession?",
+      "subtitle": "This helps us suggest relevant job searches for you."
+    },
+    "professions": {
+      "engineering": "Engineering",
+      "product": "Product",
+      "design": "Design",
+      "marketing": "Marketing",
+      "sales": "Sales",
+      "operations": "Operations",
+      "hr": "HR",
+      "finance": "Finance",
+      "other": "Other"
+    },
+    "experience": {
+      "title": "What's your experience level?",
+      "subtitle": "Choose the level that best describes your career stage.",
+      "entry": "Entry Level",
+      "entryDesc": "0-1 years of experience",
+      "junior": "Junior",
+      "juniorDesc": "1-3 years of experience",
+      "mid": "Mid Level",
+      "midDesc": "3-5 years of experience",
+      "senior": "Senior",
+      "seniorDesc": "5-8 years of experience",
+      "lead": "Lead / Staff",
+      "leadDesc": "8+ years, leading teams or projects",
+      "executive": "Executive",
+      "executiveDesc": "Director, VP, or C-level"
+    },
+    "location": {
+      "title": "Where do you want to work?",
+      "subtitle": "This will be used as the default location for job searches.",
+      "label": "Preferred Location",
+      "placeholder": "e.g., San Francisco, Remote, New York...",
+      "hint": "You can always change this when searching for jobs."
+    },
+    "summary": {
+      "title": "Your Profile Summary",
+      "profession": "Profession",
+      "experience": "Experience",
+      "location": "Location"
+    },
+    "banner": {
+      "title": "Complete your profile",
+      "subtitle": "Help us find better job matches for you",
+      "action": "Complete Now"
+    }
+  },
   "stages": {
     "wishlist": "Wishlist",
     "applied": "Applied",

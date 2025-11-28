@@ -6,6 +6,7 @@ import {
   text,
   integer,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const stageEnum = pgEnum("stage", [
@@ -19,6 +20,32 @@ export const stageEnum = pgEnum("stage", [
 
 export type Stage = (typeof stageEnum.enumValues)[number];
 
+// User profile enums for onboarding
+export const professionEnum = pgEnum("profession", [
+  "engineering",
+  "product",
+  "design",
+  "marketing",
+  "sales",
+  "operations",
+  "hr",
+  "finance",
+  "other",
+]);
+
+export type Profession = (typeof professionEnum.enumValues)[number];
+
+export const experienceLevelEnum = pgEnum("experience_level", [
+  "entry",
+  "junior",
+  "mid",
+  "senior",
+  "lead",
+  "executive",
+]);
+
+export type ExperienceLevel = (typeof experienceLevelEnum.enumValues)[number];
+
 // Users table for LinkedIn OAuth
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -26,12 +53,31 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }),
   name: varchar("name", { length: 255 }).notNull(),
   profilePicture: text("profile_picture"),
+  country: varchar("country", { length: 100 }), // From LinkedIn locale
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+// User profiles table for onboarding data
+export const userProfiles = pgTable("user_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique()
+    .notNull(),
+  profession: professionEnum("profession"),
+  experienceLevel: experienceLevelEnum("experience_level"),
+  preferredLocation: varchar("preferred_location", { length: 255 }),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type NewUserProfile = typeof userProfiles.$inferInsert;
 
 // Refresh tokens table for JWT refresh token rotation
 export const refreshTokens = pgTable("refresh_tokens", {
