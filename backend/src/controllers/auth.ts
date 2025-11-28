@@ -5,8 +5,12 @@ import {
   db,
   users,
   refreshTokens,
+  userProfiles,
   type NewUser,
   type NewRefreshToken,
+  type NewUserProfile,
+  type Profession,
+  type ExperienceLevel,
 } from "../db/index.js";
 import {
   getAuthorizationUrl,
@@ -201,6 +205,7 @@ export async function handleLinkedInCallback(req: Request, res: Response) {
         email: userInfo.email || null,
         name: userInfo.name,
         profilePicture: userInfo.picture || null,
+        country: userInfo.locale?.country || null,
       };
 
       [user] = await db.insert(users).values(newUser).returning();
@@ -212,6 +217,7 @@ export async function handleLinkedInCallback(req: Request, res: Response) {
           email: userInfo.email || user.email,
           name: userInfo.name,
           profilePicture: userInfo.picture || user.profilePicture,
+          country: userInfo.locale?.country || user.country,
           updatedAt: new Date(),
         })
         .where(eq(users.id, user.id))
@@ -374,5 +380,154 @@ export async function logout(req: Request, res: Response) {
   } catch (error) {
     console.error("Error during logout:", error);
     res.status(500).json({ error: "Failed to logout" });
+  }
+}
+
+/**
+ * Get user profile (with onboarding data)
+ * Auto-creates profile if it doesn't exist
+ * GET /api/auth/profile
+ */
+export async function getProfile(req: Request, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, req.user.sub));
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find or create profile
+    let [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, user.id));
+
+    if (!profile) {
+      // Auto-create profile with default preferredLocation from user's country
+      const newProfile: NewUserProfile = {
+        userId: user.id,
+        preferredLocation: user.country || null,
+        onboardingCompleted: false,
+      };
+      [profile] = await db.insert(userProfiles).values(newProfile).returning();
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        country: user.country,
+      },
+      profile: {
+        id: profile.id,
+        profession: profile.profession,
+        experienceLevel: profile.experienceLevel,
+        preferredLocation: profile.preferredLocation,
+        onboardingCompleted: profile.onboardingCompleted,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting profile:", error);
+    res.status(500).json({ error: "Failed to get profile" });
+  }
+}
+
+/**
+ * Update user profile
+ * PATCH /api/auth/profile
+ */
+export async function updateProfile(req: Request, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const {
+      profession,
+      experienceLevel,
+      preferredLocation,
+      onboardingCompleted,
+    } = req.body;
+
+    // Find user
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, req.user.sub));
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find or create profile
+    let [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, user.id));
+
+    if (!profile) {
+      // Create profile if it doesn't exist
+      const newProfile: NewUserProfile = {
+        userId: user.id,
+        profession: profession as Profession | undefined,
+        experienceLevel: experienceLevel as ExperienceLevel | undefined,
+        preferredLocation: preferredLocation || user.country || null,
+        onboardingCompleted: onboardingCompleted ?? false,
+      };
+      [profile] = await db.insert(userProfiles).values(newProfile).returning();
+    } else {
+      // Update existing profile
+      const updateData: Partial<NewUserProfile> = {
+        updatedAt: new Date(),
+      };
+
+      if (profession !== undefined) {
+        updateData.profession = profession as Profession | null;
+      }
+      if (experienceLevel !== undefined) {
+        updateData.experienceLevel = experienceLevel as ExperienceLevel | null;
+      }
+      if (preferredLocation !== undefined) {
+        updateData.preferredLocation = preferredLocation;
+      }
+      if (onboardingCompleted !== undefined) {
+        updateData.onboardingCompleted = onboardingCompleted;
+      }
+
+      [profile] = await db
+        .update(userProfiles)
+        .set(updateData)
+        .where(eq(userProfiles.id, profile.id))
+        .returning();
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        country: user.country,
+      },
+      profile: {
+        id: profile.id,
+        profession: profile.profession,
+        experienceLevel: profile.experienceLevel,
+        preferredLocation: profile.preferredLocation,
+        onboardingCompleted: profile.onboardingCompleted,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 }

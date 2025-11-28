@@ -10,8 +10,10 @@ import { AuthContext } from "../context/AuthContext";
 // Mock auth context value
 const mockAuthContextValue = {
   user: null,
+  profile: null,
   accessToken: null,
   isLoading: false,
+  isProfileLoading: false,
   isAuthenticated: false,
   authStatus: { linkedInConfigured: true, devAuthEnabled: true },
   login: async () => {},
@@ -19,6 +21,8 @@ const mockAuthContextValue = {
   logout: async () => {},
   setAuthFromCallback: async () => {},
   getAccessToken: () => null,
+  fetchProfile: async () => {},
+  updateProfile: async () => {},
 };
 
 const meta = {
