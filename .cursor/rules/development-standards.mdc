@@ -1,0 +1,29 @@
+---
+description: Core development standards for security and testing
+globs:
+alwaysApply: true
+---
+
+# Development Standards
+
+## Security First
+
+Security is the most important feature. Always prioritize security in all development decisions:
+- Never expose sensitive data (API keys, tokens, credentials) in code or logs
+- Validate and sanitize all user inputs
+- Use parameterized queries to prevent SQL injection
+- Implement proper authentication and authorization checks
+- Follow the principle of least privilege
+- Keep dependencies updated to patch known vulnerabilities
+
+## Testing Requirements
+
+All code must be tested. Testing priority (highest to lowest):
+1. **Unit Tests** (required) - Every function/component should have unit tests
+2. **Integration Tests** (preferred) - Test interactions between modules
+3. **E2E Tests** (consider) - For critical user flows and complex features
+
+When adding new features or fixing bugs:
+- Write unit tests at minimum
+- Add integration tests for API endpoints and database operations
+- Consider E2E tests for user-facing features
