@@ -82,9 +82,6 @@ jobs:
             echo "🔨 Building containers..."
             docker compose -f docker-compose.prod.yml build --no-cache
 
-            echo "🗄️ Running database migrations..."
-            docker compose -f docker-compose.prod.yml run --rm backend npm run db:migrate
-
             echo "🔄 Restarting services..."
             docker compose -f docker-compose.prod.yml up -d --force-recreate
 
