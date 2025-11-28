@@ -12,7 +12,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "lint": "oxlint src/"
+    "lint": "oxlint src/",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -29,6 +31,8 @@
     "react-i18next": "^16.3.5"
   },
   "devDependencies": {
+    "storybook": "^10.1.0",
+    "@storybook/react": "^10.1.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
