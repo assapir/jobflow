@@ -105,7 +105,7 @@ describe("Profile Data Validation", () => {
 
   it("should have proper type exports", async () => {
     const schema = await import("../../db/schema.js");
-    
+
     // Check that types are exported (we can't directly test types at runtime,
     // but we can verify the exports exist)
     assert.ok("Profession" in schema || schema.professionEnum, "Profession type should be available");
