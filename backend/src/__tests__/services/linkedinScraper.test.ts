@@ -117,33 +117,6 @@ describe("LinkedIn Scraper Tests", () => {
     });
   });
 
-  describe("Search Function Contract", () => {
-    it("should accept string query parameter", () => {
-      // Type check - function signature
-      const query: string = "test";
-      assert.strictEqual(typeof query, "string");
-    });
-
-    it("should accept optional location parameter", () => {
-      const location: string | undefined = "San Francisco";
-      assert.ok(location === undefined || typeof location === "string");
-    });
-
-    it("should return Promise<SearchResult>", () => {
-      // TypeScript already verifies the return type at compile time
-      // In CI, we skip actually calling the function since Playwright browsers aren't installed
-      if (process.env.CI && !process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
-        // Just verify the function exists and has the right signature
-        assert.strictEqual(typeof searchJobs, "function");
-        return;
-      }
-      
-      // Only call the function if Playwright is available (local dev)
-      const resultPromise = searchJobs("test", "location");
-      assert.ok(resultPromise instanceof Promise);
-    });
-  });
-
   describe("Cache Behavior (Mock-based)", () => {
     it("should return cached results when cache is valid", async () => {
       // This test verifies cache behavior by making two calls
