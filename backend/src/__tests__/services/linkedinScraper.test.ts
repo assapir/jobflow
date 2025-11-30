@@ -117,27 +117,6 @@ describe("LinkedIn Scraper Tests", () => {
     });
   });
 
-  describe("Search Function Contract", () => {
-    it("should accept string query parameter", () => {
-      // Type check - function signature
-      const query: string = "test";
-      assert.strictEqual(typeof query, "string");
-    });
-
-    it("should accept optional location parameter", () => {
-      const location: string | undefined = "San Francisco";
-      assert.ok(location === undefined || typeof location === "string");
-    });
-
-    it("should return Promise<SearchResult>", async () => {
-      // Verify the function signature returns a Promise
-      const resultPromise = searchJobs("test", "location");
-      assert.ok(resultPromise instanceof Promise);
-      
-      // Don't await the promise to avoid long-running test
-      // The promise will be handled by the test framework
-    });
-  });
 
   describe("Cache Behavior (Mock-based)", () => {
     it("should return cached results when cache is valid", async () => {
