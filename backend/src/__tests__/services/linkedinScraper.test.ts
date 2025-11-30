@@ -117,7 +117,6 @@ describe("LinkedIn Scraper Tests", () => {
     });
   });
 
-
   describe("Cache Behavior (Mock-based)", () => {
     it("should return cached results when cache is valid", async () => {
       // This test verifies cache behavior by making two calls
