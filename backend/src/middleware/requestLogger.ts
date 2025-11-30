@@ -12,9 +12,38 @@ declare global {
   }
 }
 
+// List of headers that should be redacted from logs
+const SENSITIVE_HEADERS = [
+  "authorization",
+  "cookie",
+  "x-api-key",
+  "x-auth-token",
+];
+
 // Create pino-http middleware
 export const httpLogger = pinoHttp({
   logger,
+  serializers: {
+    req: (req) => {
+      // Redact sensitive headers
+      const redactedHeaders = { ...req.headers };
+      for (const header of SENSITIVE_HEADERS) {
+        if (redactedHeaders[header]) {
+          redactedHeaders[header] = "[REDACTED]";
+        }
+      }
+      return {
+        id: req.id,
+        method: req.method,
+        url: req.url,
+        query: req.query,
+        params: req.params,
+        headers: redactedHeaders,
+        remoteAddress: req.remoteAddress,
+        remotePort: req.remotePort,
+      };
+    },
+  },
   genReqId: (req) => {
     // Use existing X-Request-ID header or generate new one
     const existingId = req.headers["x-request-id"];
