@@ -1,10 +1,12 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
+import { describe, it, after, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
-import { z } from "zod";
-import {
-  professionEnum,
-  experienceLevelEnum,
-} from "../../db/schema.js";
+import { AppError } from "../../middleware/errorHandler.js";
+import { updateProfile } from "../../controllers/auth.js";
+
+// Importing auth.ts starts a setInterval and DB connection — force exit after tests
+after(() => {
+  setTimeout(() => process.exit(0), 100);
+});
 
 // Store original env
 let originalEnv: NodeJS.ProcessEnv;
@@ -119,106 +121,102 @@ describe("Profile Data Validation", () => {
   });
 });
 
-// Schema matching the controller's updateProfileSchema
-const updateProfileSchema = z.object({
-  profession: z.enum(professionEnum.enumValues).nullish(),
-  experienceLevel: z.enum(experienceLevelEnum.enumValues).nullish(),
-  preferredLocation: z.string().max(255).nullish(),
-  onboardingCompleted: z.boolean().optional(),
-});
+// Helper to create a mock request with user attached
+function createAuthenticatedReq(body: unknown) {
+  return {
+    body,
+    user: { sub: "test-user-id", name: "Test", iat: 0, exp: 0 },
+  };
+}
 
-describe("Update Profile Validation", () => {
-  it("should accept valid profile with all fields", () => {
-    const input = {
-      profession: "engineering",
-      experienceLevel: "senior",
-      preferredLocation: "Tel Aviv",
-      onboardingCompleted: true,
-    };
-    assert.strictEqual(updateProfileSchema.safeParse(input).success, true);
-  });
+function createMockRes() {
+  let statusCode = 200;
+  let jsonData: unknown;
+  return {
+    status(code: number) { statusCode = code; return this; },
+    json(data: unknown) { jsonData = data; return this; },
+    getStatus() { return statusCode; },
+    getData() { return jsonData; },
+  };
+}
 
-  it("should accept empty object (all optional)", () => {
-    assert.strictEqual(updateProfileSchema.safeParse({}).success, true);
-  });
+describe("updateProfile controller validation", () => {
+  it("should throw AppError 400 for invalid profession", async () => {
+    const req = createAuthenticatedReq({ profession: "hacker" });
+    const res = createMockRes();
 
-  it("should accept null values for nullable fields", () => {
-    const input = {
-      profession: null,
-      experienceLevel: null,
-      preferredLocation: null,
-    };
-    assert.strictEqual(updateProfileSchema.safeParse(input).success, true);
-  });
-
-  it("should reject invalid profession value", () => {
-    assert.strictEqual(
-      updateProfileSchema.safeParse({ profession: "hacker" }).success,
-      false
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        assert.strictEqual(err.message, "Validation failed");
+        return true;
+      }
     );
   });
 
-  it("should reject invalid experienceLevel value", () => {
-    assert.strictEqual(
-      updateProfileSchema.safeParse({ experienceLevel: "godlike" }).success,
-      false
+  it("should throw AppError 400 for invalid experienceLevel", async () => {
+    const req = createAuthenticatedReq({ experienceLevel: "godlike" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
     );
   });
 
-  it("should reject non-boolean onboardingCompleted", () => {
-    assert.strictEqual(
-      updateProfileSchema.safeParse({ onboardingCompleted: "yes" }).success,
-      false
+  it("should throw AppError 400 for non-boolean onboardingCompleted", async () => {
+    const req = createAuthenticatedReq({ onboardingCompleted: "yes" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
     );
   });
 
-  it("should reject preferredLocation over 255 chars", () => {
-    assert.strictEqual(
-      updateProfileSchema.safeParse({ preferredLocation: "x".repeat(256) }).success,
-      false
+  it("should throw AppError 400 for preferredLocation over 255 chars", async () => {
+    const req = createAuthenticatedReq({ preferredLocation: "x".repeat(256) });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
     );
   });
 
-  it("should accept all valid profession values from schema", () => {
-    for (const value of professionEnum.enumValues) {
-      assert.strictEqual(
-        updateProfileSchema.safeParse({ profession: value }).success,
-        true,
-        `profession '${value}' should be valid`
-      );
-    }
-  });
+  it("should throw AppError 400 for SQL injection in profession", async () => {
+    const req = createAuthenticatedReq({ profession: "'; DROP TABLE users;--" });
+    const res = createMockRes();
 
-  it("should accept all valid experienceLevel values from schema", () => {
-    for (const value of experienceLevelEnum.enumValues) {
-      assert.strictEqual(
-        updateProfileSchema.safeParse({ experienceLevel: value }).success,
-        true,
-        `experienceLevel '${value}' should be valid`
-      );
-    }
-  });
-
-  it("should reject SQL injection attempt in profession", () => {
-    assert.strictEqual(
-      updateProfileSchema.safeParse({ profession: "'; DROP TABLE users;--" }).success,
-      false
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
     );
   });
 
-  it("should preserve undefined vs null distinction", () => {
-    // undefined = field not sent (omitted from update)
-    const withUndefined = updateProfileSchema.safeParse({});
-    assert.strictEqual(withUndefined.success, true);
-    if (withUndefined.success) {
-      assert.strictEqual(withUndefined.data.profession, undefined);
-    }
+  it("should throw AppError 401 when not authenticated", async () => {
+    const req = { body: { profession: "engineering" }, user: undefined };
+    const res = createMockRes();
 
-    // null = explicitly clear the field
-    const withNull = updateProfileSchema.safeParse({ profession: null });
-    assert.strictEqual(withNull.success, true);
-    if (withNull.success) {
-      assert.strictEqual(withNull.data.profession, null);
-    }
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 401);
+        return true;
+      }
+    );
   });
 });

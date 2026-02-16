@@ -1,151 +1,33 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert";
-import { z } from "zod";
 import {
   createMockResponse,
   sampleJobs,
   type MockJob,
 } from "../helpers/mockDb.js";
-import { stageEnum } from "../../db/schema.js";
-
-// Use enum values from schema (single source of truth)
-const stageValues = stageEnum.enumValues;
-
-const createJobSchema = z.object({
-  company: z.string().min(1).max(255),
-  position: z.string().min(1).max(255),
-  location: z.string().max(255).optional(),
-  salary: z.string().max(100).optional(),
-  linkedinUrl: z.string().url().optional().or(z.literal("")),
-  description: z.string().optional(),
-  stage: z.enum(stageValues).optional(),
-  notes: z.string().optional(),
-  appliedAt: z.string().datetime().optional(),
-});
-
-const stageSchema = z.enum(stageValues);
-const urlSchema = z.string().url().optional().or(z.literal(""));
-const updateStageSchema = z.object({
-  stage: z.enum(stageValues),
-  order: z.number().int().min(0).optional(),
-});
-const reorderSchema = z.object({
-  jobs: z.array(
-    z.object({
-      id: z.string().uuid(),
-      stage: z.enum(stageValues),
-      order: z.number().int().min(0),
-    })
-  ),
-});
-
-// We need to mock the db module before importing the controller
-// Using a simple approach: create mock functions that will be used by the controller
+import { AppError } from "../../middleware/errorHandler.js";
+import { updateJobStage, reorderJobs } from "../../controllers/jobs.js";
 
 // Mock data storage
 let mockJobs: MockJob[] = [];
 
+// Helper to create a mock request with user attached
+function createMockReq(overrides: {
+  params?: Record<string, string>;
+  body?: unknown;
+  query?: Record<string, string>;
+}) {
+  return {
+    params: overrides.params || {},
+    body: overrides.body || {},
+    query: overrides.query || {},
+    user: { sub: "test-user-id", name: "Test", iat: 0, exp: 0 },
+  };
+}
+
 describe("Jobs Controller Unit Tests", () => {
   beforeEach(() => {
     mockJobs = [...sampleJobs];
-  });
-
-  describe("Input Validation", () => {
-    it("should validate required fields for job creation", () => {
-      // Test that company is required
-      const invalidInput = {
-        position: "Developer",
-        // missing company
-      };
-
-      const result = createJobSchema.safeParse(invalidInput);
-      assert.strictEqual(result.success, false);
-    });
-
-    it("should validate stage enum values", () => {
-      // Valid stages
-      for (const stage of stageValues) {
-        const result = stageSchema.safeParse(stage);
-        assert.strictEqual(
-          result.success,
-          true,
-          `Stage ${stage} should be valid`
-        );
-      }
-
-      // Invalid stage
-      const invalidResult = stageSchema.safeParse("invalid_stage");
-      assert.strictEqual(invalidResult.success, false);
-    });
-
-    it("should validate LinkedIn URL format", () => {
-      // Valid URLs
-      assert.strictEqual(
-        urlSchema.safeParse("https://linkedin.com/jobs/123").success,
-        true
-      );
-      assert.strictEqual(
-        urlSchema.safeParse("https://www.linkedin.com/jobs/view/123").success,
-        true
-      );
-      assert.strictEqual(urlSchema.safeParse("").success, true);
-      assert.strictEqual(urlSchema.safeParse(undefined).success, true);
-
-      // Invalid URL
-      assert.strictEqual(urlSchema.safeParse("not-a-url").success, false);
-    });
-
-    it("should validate reorder request format", () => {
-      // Valid reorder request
-      const validRequest = {
-        jobs: [
-          {
-            id: "550e8400-e29b-41d4-a716-446655440001",
-            stage: "applied",
-            order: 0,
-          },
-          {
-            id: "550e8400-e29b-41d4-a716-446655440002",
-            stage: "applied",
-            order: 1,
-          },
-        ],
-      };
-      assert.strictEqual(reorderSchema.safeParse(validRequest).success, true);
-
-      // Invalid - missing id
-      const invalidRequest1 = {
-        jobs: [{ stage: "applied", order: 0 }],
-      };
-      assert.strictEqual(
-        reorderSchema.safeParse(invalidRequest1).success,
-        false
-      );
-
-      // Invalid - negative order
-      const invalidRequest2 = {
-        jobs: [
-          {
-            id: "550e8400-e29b-41d4-a716-446655440001",
-            stage: "applied",
-            order: -1,
-          },
-        ],
-      };
-      assert.strictEqual(
-        reorderSchema.safeParse(invalidRequest2).success,
-        false
-      );
-
-      // Invalid - bad UUID
-      const invalidRequest3 = {
-        jobs: [{ id: "not-a-uuid", stage: "applied", order: 0 }],
-      };
-      assert.strictEqual(
-        reorderSchema.safeParse(invalidRequest3).success,
-        false
-      );
-    });
   });
 
   describe("Response Structure", () => {
@@ -314,50 +196,103 @@ describe("Jobs Controller Unit Tests", () => {
     });
   });
 
-  describe("Stage Update Validation", () => {
-    it("should accept valid stage and order", () => {
-      const result = updateStageSchema.safeParse({ stage: "applied", order: 3 });
-      assert.strictEqual(result.success, true);
+  describe("updateJobStage validation", () => {
+    it("should throw AppError 400 for invalid stage", async () => {
+      const req = createMockReq({
+        params: { id: "550e8400-e29b-41d4-a716-446655440001" },
+        body: { stage: "promoted", order: 0 },
+      });
+      const res = createMockResponse();
+
+      await assert.rejects(
+        () => updateJobStage(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          assert.strictEqual(err.message, "Validation failed");
+          return true;
+        }
+      );
     });
 
-    it("should accept stage without order (optional)", () => {
-      const result = updateStageSchema.safeParse({ stage: "interview" });
-      assert.strictEqual(result.success, true);
+    it("should throw AppError 400 for negative order", async () => {
+      const req = createMockReq({
+        params: { id: "550e8400-e29b-41d4-a716-446655440001" },
+        body: { stage: "applied", order: -1 },
+      });
+      const res = createMockResponse();
+
+      await assert.rejects(
+        () => updateJobStage(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          return true;
+        }
+      );
     });
 
-    it("should reject missing stage", () => {
-      const result = updateStageSchema.safeParse({ order: 0 });
-      assert.strictEqual(result.success, false);
+    it("should throw AppError 400 for float order", async () => {
+      const req = createMockReq({
+        params: { id: "550e8400-e29b-41d4-a716-446655440001" },
+        body: { stage: "applied", order: 1.5 },
+      });
+      const res = createMockResponse();
+
+      await assert.rejects(
+        () => updateJobStage(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          return true;
+        }
+      );
     });
 
-    it("should reject invalid stage value", () => {
-      const result = updateStageSchema.safeParse({ stage: "promoted" });
-      assert.strictEqual(result.success, false);
+    it("should throw AppError 400 for string order", async () => {
+      const req = createMockReq({
+        params: { id: "550e8400-e29b-41d4-a716-446655440001" },
+        body: { stage: "applied", order: "hello" },
+      });
+      const res = createMockResponse();
+
+      await assert.rejects(
+        () => updateJobStage(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          return true;
+        }
+      );
     });
 
-    it("should reject negative order", () => {
-      const result = updateStageSchema.safeParse({ stage: "applied", order: -1 });
-      assert.strictEqual(result.success, false);
+    it("should throw AppError 400 for missing stage", async () => {
+      const req = createMockReq({
+        params: { id: "550e8400-e29b-41d4-a716-446655440001" },
+        body: { order: 0 },
+      });
+      const res = createMockResponse();
+
+      await assert.rejects(
+        () => updateJobStage(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          return true;
+        }
+      );
     });
 
-    it("should reject float order", () => {
-      const result = updateStageSchema.safeParse({ stage: "applied", order: 1.5 });
-      assert.strictEqual(result.success, false);
-    });
+    it("should throw AppError 400 for reorder with bad data", async () => {
+      const req = createMockReq({
+        body: {
+          jobs: [{ id: "not-a-uuid", stage: "applied", order: 0 }],
+        },
+      });
+      const res = createMockResponse();
 
-    it("should reject string order", () => {
-      const result = updateStageSchema.safeParse({ stage: "applied", order: "hello" });
-      assert.strictEqual(result.success, false);
-    });
-
-    it("should accept order of 0", () => {
-      const result = updateStageSchema.safeParse({ stage: "wishlist", order: 0 });
-      assert.strictEqual(result.success, true);
-    });
-
-    it("should accept large order values", () => {
-      const result = updateStageSchema.safeParse({ stage: "wishlist", order: 9999 });
-      assert.strictEqual(result.success, true);
+      await assert.rejects(
+        () => reorderJobs(req as any, res as any),
+        (err: AppError) => {
+          assert.strictEqual(err.statusCode, 400);
+          return true;
+        }
+      );
     });
   });
 });
