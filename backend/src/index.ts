@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.js";
 import logger from "./lib/logger.js";
 import { httpLogger, requestIdMiddleware } from "./middleware/requestLogger.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { requireAuth } from "./middleware/auth.js";
 import { db } from "./db/index.js";
 import { sql } from "drizzle-orm";
 
@@ -33,12 +34,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/jobs", jobsRouter);
 app.use("/api/linkedin", linkedinRouter);
 
-// Enhanced health endpoint with DB check and metrics
+// Health endpoint — public, minimal info (used by monitoring/load balancers)
 app.get("/api/health", async (_req, res) => {
-  const uptime = Math.floor((Date.now() - startTime) / 1000);
-  const memUsage = process.memoryUsage();
-
-  // Check database connectivity
   let dbStatus = "ok";
   try {
     await db.execute(sql`SELECT 1`);
@@ -49,18 +46,11 @@ app.get("/api/health", async (_req, res) => {
   res.json({
     status: dbStatus === "ok" ? "ok" : "degraded",
     timestamp: new Date().toISOString(),
-    uptime,
-    database: dbStatus,
-    memory: {
-      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
-      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
-      rss: Math.round(memUsage.rss / 1024 / 1024),
-    },
   });
 });
 
-// Metrics endpoint
-app.get("/api/metrics", (_req, res) => {
+// Metrics endpoint — authenticated, detailed system info
+app.get("/api/metrics", requireAuth, (_req, res) => {
   const uptime = Math.floor((Date.now() - startTime) / 1000);
   const memUsage = process.memoryUsage();
   const cpuUsage = process.cpuUsage();
@@ -77,8 +67,6 @@ app.get("/api/metrics", (_req, res) => {
       user: cpuUsage.user,
       system: cpuUsage.system,
     },
-    nodeVersion: process.version,
-    platform: process.platform,
   });
 });
 
