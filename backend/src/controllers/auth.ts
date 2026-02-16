@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import { randomBytes } from "crypto";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { z } from "zod";
 import {
   db,
   users,
   refreshTokens,
+  oauthStates,
   userProfiles,
   professionEnum,
   experienceLevelEnum,
@@ -23,19 +24,20 @@ import { generateTokenPair } from "../auth/jwt.js";
 import { AppError } from "../middleware/errorHandler.js";
 import logger from "../lib/logger.js";
 
-// Store OAuth state temporarily (in production, use Redis or database)
-const oauthStates = new Map<string, { createdAt: number }>();
+const OAUTH_STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-// Clean up expired states every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [state, data] of oauthStates.entries()) {
-    if (now - data.createdAt > 10 * 60 * 1000) {
-      // 10 minutes
-      oauthStates.delete(state);
-    }
+// Clean up expired refresh tokens and OAuth states every hour
+const cleanupTimer = setInterval(async () => {
+  try {
+    const now = new Date();
+    await db.delete(refreshTokens).where(lt(refreshTokens.expiresAt, now));
+    await db.delete(oauthStates).where(lt(oauthStates.expiresAt, now));
+    logger.info("Expired tokens and OAuth states cleaned up");
+  } catch (err) {
+    logger.error({ err }, "Failed to clean up expired records");
   }
-}, 5 * 60 * 1000);
+}, 60 * 60 * 1000);
+cleanupTimer.unref();
 
 const REFRESH_TOKEN_COOKIE = "refresh_token";
 const COOKIE_OPTIONS = {
@@ -129,7 +131,10 @@ export async function initiateLinkedInAuth(_req: Request, res: Response) {
   }
 
   const state = randomBytes(16).toString("hex");
-  oauthStates.set(state, { createdAt: Date.now() });
+  await db.insert(oauthStates).values({
+    state,
+    expiresAt: new Date(Date.now() + OAUTH_STATE_TTL_MS),
+  });
 
   const authUrl = getAuthorizationUrl(state);
   res.json({ authUrl });
@@ -157,11 +162,15 @@ export async function handleLinkedInCallback(req: Request, res: Response) {
     return res.redirect(`${frontendUrl}/login?error=invalid_request`);
   }
 
-  // Verify state
-  if (!oauthStates.has(state)) {
+  // Verify and consume state (single atomic delete)
+  const [deleted] = await db
+    .delete(oauthStates)
+    .where(eq(oauthStates.state, state))
+    .returning();
+
+  if (!deleted || deleted.expiresAt < new Date()) {
     return res.redirect(`${frontendUrl}/login?error=invalid_state`);
   }
-  oauthStates.delete(state);
 
   // Exchange code for token
   const tokenResponse = await exchangeCodeForToken(code);
