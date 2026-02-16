@@ -1,5 +1,12 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
+import { describe, it, after, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
+import { AppError } from "../../middleware/errorHandler.js";
+import { updateProfile } from "../../controllers/auth.js";
+
+// Importing auth.ts starts a setInterval and DB connection — force exit after tests
+after(() => {
+  setTimeout(() => process.exit(0), 100);
+});
 
 // Store original env
 let originalEnv: NodeJS.ProcessEnv;
@@ -111,5 +118,105 @@ describe("Profile Data Validation", () => {
     assert.ok("Profession" in schema || schema.professionEnum, "Profession type should be available");
     assert.ok("ExperienceLevel" in schema || schema.experienceLevelEnum, "ExperienceLevel type should be available");
     assert.ok("UserProfile" in schema || schema.userProfiles, "UserProfile type should be available");
+  });
+});
+
+// Helper to create a mock request with user attached
+function createAuthenticatedReq(body: unknown) {
+  return {
+    body,
+    user: { sub: "test-user-id", name: "Test", iat: 0, exp: 0 },
+  };
+}
+
+function createMockRes() {
+  let statusCode = 200;
+  let jsonData: unknown;
+  return {
+    status(code: number) { statusCode = code; return this; },
+    json(data: unknown) { jsonData = data; return this; },
+    getStatus() { return statusCode; },
+    getData() { return jsonData; },
+  };
+}
+
+describe("updateProfile controller validation", () => {
+  it("should throw AppError 400 for invalid profession", async () => {
+    const req = createAuthenticatedReq({ profession: "hacker" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        assert.strictEqual(err.message, "Validation failed");
+        return true;
+      }
+    );
+  });
+
+  it("should throw AppError 400 for invalid experienceLevel", async () => {
+    const req = createAuthenticatedReq({ experienceLevel: "godlike" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
+    );
+  });
+
+  it("should throw AppError 400 for non-boolean onboardingCompleted", async () => {
+    const req = createAuthenticatedReq({ onboardingCompleted: "yes" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
+    );
+  });
+
+  it("should throw AppError 400 for preferredLocation over 255 chars", async () => {
+    const req = createAuthenticatedReq({ preferredLocation: "x".repeat(256) });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
+    );
+  });
+
+  it("should throw AppError 400 for SQL injection in profession", async () => {
+    const req = createAuthenticatedReq({ profession: "'; DROP TABLE users;--" });
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 400);
+        return true;
+      }
+    );
+  });
+
+  it("should throw AppError 401 when not authenticated", async () => {
+    const req = { body: { profession: "engineering" }, user: undefined };
+    const res = createMockRes();
+
+    await assert.rejects(
+      () => updateProfile(req as any, res as any),
+      (err: AppError) => {
+        assert.strictEqual(err.statusCode, 401);
+        return true;
+      }
+    );
   });
 });

@@ -3,20 +3,14 @@ import { eq, asc, and } from "drizzle-orm";
 import {
   db,
   jobApplications,
+  stageEnum,
   type Stage,
   type NewJobApplication,
 } from "../db/index.js";
 import { z } from "zod";
 import { AppError } from "../middleware/errorHandler.js";
 
-const stageValues = [
-  "wishlist",
-  "applied",
-  "phone_screen",
-  "interview",
-  "offer",
-  "rejected",
-] as const;
+const stageValues = stageEnum.enumValues;
 
 const createJobSchema = z.object({
   company: z.string().min(1).max(255),
@@ -169,14 +163,21 @@ export async function deleteJob(req: Request, res: Response) {
   res.json({ message: "Job deleted successfully" });
 }
 
+const updateStageSchema = z.object({
+  stage: z.enum(stageValues),
+  order: z.number().int().min(0).optional(),
+});
+
 export async function updateJobStage(req: Request, res: Response) {
   const { id } = req.params;
   const userId = req.user!.sub;
-  const { stage, order } = req.body;
 
-  if (!stageValues.includes(stage)) {
-    throw new AppError(400, "Invalid stage");
+  const validation = updateStageSchema.safeParse(req.body);
+  if (!validation.success) {
+    throw new AppError(400, "Validation failed");
   }
+
+  const { stage, order } = validation.data;
 
   const [job] = await db
     .update(jobApplications)
