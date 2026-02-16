@@ -37,6 +37,9 @@ docker logs --tail 100 jobflow-backend
 # View Caddy (reverse proxy) logs
 docker logs jobflow-caddy
 
+# View Cloudflare Tunnel logs
+docker logs jobflow-cloudflared
+
 # View all service logs
 docker compose -f docker-compose.prod.yml logs -f
 ```
@@ -67,28 +70,22 @@ docker logs jobflow-backend 2>&1 | grep "abc123-your-correlation-id"
 
 ## Health & Metrics
 
-| Endpoint       | Description                                           |
-| -------------- | ----------------------------------------------------- |
-| `/api/health`  | Health check with DB status, memory usage, and uptime |
-| `/api/metrics` | Detailed metrics (memory, CPU, uptime)                |
+| Endpoint       | Auth     | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `/api/health`  | Public   | Basic health check (status + DB)         |
+| `/api/metrics` | Required | Detailed metrics (memory, CPU, uptime)   |
 
 ### Health check example
 
 ```bash
-curl https://your-domain.com/api/health
+curl https://jobflow.sapir.io/api/health
 ```
 
 ```json
 {
   "status": "ok",
   "timestamp": "2024-01-15T10:30:45.123Z",
-  "uptime": 86400,
-  "database": "ok",
-  "memory": {
-    "heapUsed": 45,
-    "heapTotal": 65,
-    "rss": 120
-  }
+  "database": "ok"
 }
 ```
 
@@ -104,9 +101,9 @@ curl https://your-domain.com/api/health
 
 ### Database connection issues
 
-1. Check health endpoint:
+1. Check health endpoint (from inside the Pi):
    ```bash
-   curl localhost:3002/api/health
+   curl http://localhost:80/api/health
    ```
 2. If `database: "error"`, check PostgreSQL:
    ```bash
@@ -115,9 +112,9 @@ curl https://your-domain.com/api/health
 
 ### High memory usage
 
-1. Check metrics:
+1. Check metrics (requires auth token):
    ```bash
-   curl localhost:3002/api/metrics
+   curl -H "Authorization: Bearer $TOKEN" http://localhost:80/api/metrics
    ```
 2. Restart backend:
    ```bash
@@ -139,11 +136,15 @@ curl https://your-domain.com/api/health
    docker compose -f docker-compose.prod.yml config
    ```
 
-### SSL/HTTPS issues
+### Cloudflare Tunnel issues
 
-1. Check Caddy logs:
+1. Check `cloudflared` container logs:
    ```bash
-   docker logs jobflow-caddy
+   docker logs jobflow-cloudflared
    ```
-2. Verify DNS is pointing to server
-3. Ensure ports 80/443 are forwarded
+2. Verify the tunnel is running:
+   ```bash
+   cloudflared tunnel info <TUNNEL_ID>
+   ```
+3. Ensure `cloudflared-credentials.json` exists and is valid
+4. Check Cloudflare dashboard for tunnel status at https://one.dash.cloudflare.com

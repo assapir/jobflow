@@ -21,8 +21,8 @@ No open ports on the server or router. The Cloudflare Tunnel creates an outbound
 | ------------- | ---------------------------------------------- |
 | Ingress       | Cloudflare Tunnel (HTTPS, no open ports)       |
 | Reverse Proxy | Caddy (HTTP internally, TLS handled by Tunnel) |
-| Backend       | Node.js 22 on Alpine Linux                     |
-| Database      | PostgreSQL 16                                  |
+| Backend       | Node.js 24 on Alpine Linux                     |
+| Database      | PostgreSQL 17                                  |
 | Frontend      | Static files served by Caddy                   |
 | CI/CD         | GitHub Actions                                 |
 

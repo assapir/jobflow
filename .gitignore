@@ -31,8 +31,9 @@ drizzle/*.sql
 # Cloudflare Tunnel credentials
 cloudflared-credentials.json
 
-# Crawlee storage
+# Crawlee storage (runtime artifacts)
 storage/
+backend/storage/
 tsconfig.tsbuildinfo
 playwright-report/
 test-results/
