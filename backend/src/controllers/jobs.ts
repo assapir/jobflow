@@ -205,27 +205,30 @@ export async function reorderJobs(req: Request, res: Response) {
 
   const { jobs } = validation.data;
 
-  // Update all jobs in the batch (only user's own jobs)
-  const updates = jobs.map(async (job) => {
-    return db
-      .update(jobApplications)
-      .set({
-        stage: job.stage as Stage,
-        order: job.order,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(eq(jobApplications.id, job.id), eq(jobApplications.userId, userId))
-      );
+  // Update all jobs in a transaction to prevent partial reorders
+  const updatedJobs = await db.transaction(async (tx) => {
+    for (const job of jobs) {
+      await tx
+        .update(jobApplications)
+        .set({
+          stage: job.stage as Stage,
+          order: job.order,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(jobApplications.id, job.id),
+            eq(jobApplications.userId, userId)
+          )
+        );
+    }
+
+    return tx
+      .select()
+      .from(jobApplications)
+      .where(eq(jobApplications.userId, userId))
+      .orderBy(asc(jobApplications.order));
   });
 
-  await Promise.all(updates);
-
-  // Return updated jobs (only user's)
-  const updatedJobs = await db
-    .select()
-    .from(jobApplications)
-    .where(eq(jobApplications.userId, userId))
-    .orderBy(asc(jobApplications.order));
   res.json(updatedJobs);
 }

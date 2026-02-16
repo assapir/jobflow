@@ -47,8 +47,11 @@ export async function cleanupTestDb() {
 export async function seedTestDb() {
   const db = getTestDb();
 
+  const TEST_USER_ID = "00000000-0000-0000-0000-000000000001";
+
   const testJobs: schema.NewJobApplication[] = [
     {
+      userId: TEST_USER_ID,
       company: "Test Company A",
       position: "Software Engineer",
       location: "Remote",
@@ -60,6 +63,7 @@ export async function seedTestDb() {
       notes: "Test notes 1",
     },
     {
+      userId: TEST_USER_ID,
       company: "Test Company B",
       position: "Senior Developer",
       location: "NYC",
@@ -71,6 +75,7 @@ export async function seedTestDb() {
       notes: null,
     },
     {
+      userId: TEST_USER_ID,
       company: "Test Company C",
       position: "Tech Lead",
       location: "SF",
@@ -99,6 +104,7 @@ export async function createTestJob(
   const db = getTestDb();
 
   const defaultJob: schema.NewJobApplication = {
+    userId: "00000000-0000-0000-0000-000000000001",
     company: "Test Company",
     position: "Test Position",
     location: "Test Location",

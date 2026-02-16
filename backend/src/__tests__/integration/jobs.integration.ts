@@ -32,6 +32,7 @@ describe("Jobs Integration Tests", () => {
   describe("Create Job", () => {
     it("should create a new job with all fields", async () => {
       const newJob = {
+        userId: "00000000-0000-0000-0000-000000000001",
         company: "Test Company",
         position: "Software Engineer",
         location: "Remote",
@@ -64,6 +65,7 @@ describe("Jobs Integration Tests", () => {
 
     it("should create a job with only required fields", async () => {
       const newJob = {
+        userId: "00000000-0000-0000-0000-000000000001",
         company: "Minimal Company",
         position: "Developer",
       };
@@ -85,12 +87,12 @@ describe("Jobs Integration Tests", () => {
     it("should generate unique UUIDs for each job", async () => {
       const [job1] = await db
         .insert(jobApplications)
-        .values({ company: "Company 1", position: "Position 1" })
+        .values({ userId: "00000000-0000-0000-0000-000000000001", company: "Company 1", position: "Position 1" })
         .returning();
 
       const [job2] = await db
         .insert(jobApplications)
-        .values({ company: "Company 2", position: "Position 2" })
+        .values({ userId: "00000000-0000-0000-0000-000000000001", company: "Company 2", position: "Position 2" })
         .returning();
 
       assert.notStrictEqual(job1.id, job2.id);

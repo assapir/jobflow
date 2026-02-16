@@ -95,7 +95,9 @@ export type NewRefreshToken = typeof refreshTokens.$inferInsert;
 
 export const jobApplications = pgTable("job_applications", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
   company: varchar("company", { length: 255 }).notNull(),
   position: varchar("position", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }),
