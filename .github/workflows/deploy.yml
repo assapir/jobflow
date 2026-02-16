@@ -85,14 +85,41 @@ jobs:
             echo "🗄️ Starting database..."
             docker compose -f docker-compose.prod.yml up -d postgres
 
-            echo "⏳ Waiting for database to be ready..."
-            sleep 5
+            echo "⏳ Waiting for database to be healthy..."
+            for i in $(seq 1 30); do
+              if docker exec jobflow-db pg_isready -U postgres > /dev/null 2>&1; then
+                echo "✅ Database is ready (attempt $i)"
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "❌ Database failed to start after 30 attempts"
+                docker logs jobflow-db --tail 20
+                exit 1
+              fi
+              sleep 2
+            done
 
             echo "🗄️ Running database migrations..."
             docker compose -f docker-compose.prod.yml run --rm db-migrate
 
             echo "🔄 Starting all services..."
             docker compose -f docker-compose.prod.yml up -d
+
+            echo "⏳ Waiting for backend to be healthy..."
+            for i in $(seq 1 30); do
+              HEALTH=$(docker exec jobflow-backend wget -qO- http://localhost:3002/api/health 2>/dev/null || true)
+              if echo "$HEALTH" | grep -q '"status":"ok"'; then
+                echo "✅ Backend is healthy (attempt $i)"
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "❌ Backend health check failed after 30 attempts"
+                echo "Last response: $HEALTH"
+                docker logs jobflow-backend --tail 20
+                exit 1
+              fi
+              sleep 2
+            done
 
             echo "🧹 Cleaning up old images..."
             docker image prune -f
