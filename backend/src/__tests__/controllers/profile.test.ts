@@ -1,5 +1,10 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
+import { z } from "zod";
+import {
+  professionEnum,
+  experienceLevelEnum,
+} from "../../db/schema.js";
 
 // Store original env
 let originalEnv: NodeJS.ProcessEnv;
@@ -111,5 +116,109 @@ describe("Profile Data Validation", () => {
     assert.ok("Profession" in schema || schema.professionEnum, "Profession type should be available");
     assert.ok("ExperienceLevel" in schema || schema.experienceLevelEnum, "ExperienceLevel type should be available");
     assert.ok("UserProfile" in schema || schema.userProfiles, "UserProfile type should be available");
+  });
+});
+
+// Schema matching the controller's updateProfileSchema
+const updateProfileSchema = z.object({
+  profession: z.enum(professionEnum.enumValues).nullish(),
+  experienceLevel: z.enum(experienceLevelEnum.enumValues).nullish(),
+  preferredLocation: z.string().max(255).nullish(),
+  onboardingCompleted: z.boolean().optional(),
+});
+
+describe("Update Profile Validation", () => {
+  it("should accept valid profile with all fields", () => {
+    const input = {
+      profession: "engineering",
+      experienceLevel: "senior",
+      preferredLocation: "Tel Aviv",
+      onboardingCompleted: true,
+    };
+    assert.strictEqual(updateProfileSchema.safeParse(input).success, true);
+  });
+
+  it("should accept empty object (all optional)", () => {
+    assert.strictEqual(updateProfileSchema.safeParse({}).success, true);
+  });
+
+  it("should accept null values for nullable fields", () => {
+    const input = {
+      profession: null,
+      experienceLevel: null,
+      preferredLocation: null,
+    };
+    assert.strictEqual(updateProfileSchema.safeParse(input).success, true);
+  });
+
+  it("should reject invalid profession value", () => {
+    assert.strictEqual(
+      updateProfileSchema.safeParse({ profession: "hacker" }).success,
+      false
+    );
+  });
+
+  it("should reject invalid experienceLevel value", () => {
+    assert.strictEqual(
+      updateProfileSchema.safeParse({ experienceLevel: "godlike" }).success,
+      false
+    );
+  });
+
+  it("should reject non-boolean onboardingCompleted", () => {
+    assert.strictEqual(
+      updateProfileSchema.safeParse({ onboardingCompleted: "yes" }).success,
+      false
+    );
+  });
+
+  it("should reject preferredLocation over 255 chars", () => {
+    assert.strictEqual(
+      updateProfileSchema.safeParse({ preferredLocation: "x".repeat(256) }).success,
+      false
+    );
+  });
+
+  it("should accept all valid profession values from schema", () => {
+    for (const value of professionEnum.enumValues) {
+      assert.strictEqual(
+        updateProfileSchema.safeParse({ profession: value }).success,
+        true,
+        `profession '${value}' should be valid`
+      );
+    }
+  });
+
+  it("should accept all valid experienceLevel values from schema", () => {
+    for (const value of experienceLevelEnum.enumValues) {
+      assert.strictEqual(
+        updateProfileSchema.safeParse({ experienceLevel: value }).success,
+        true,
+        `experienceLevel '${value}' should be valid`
+      );
+    }
+  });
+
+  it("should reject SQL injection attempt in profession", () => {
+    assert.strictEqual(
+      updateProfileSchema.safeParse({ profession: "'; DROP TABLE users;--" }).success,
+      false
+    );
+  });
+
+  it("should preserve undefined vs null distinction", () => {
+    // undefined = field not sent (omitted from update)
+    const withUndefined = updateProfileSchema.safeParse({});
+    assert.strictEqual(withUndefined.success, true);
+    if (withUndefined.success) {
+      assert.strictEqual(withUndefined.data.profession, undefined);
+    }
+
+    // null = explicitly clear the field
+    const withNull = updateProfileSchema.safeParse({ profession: null });
+    assert.strictEqual(withNull.success, true);
+    if (withNull.success) {
+      assert.strictEqual(withNull.data.profession, null);
+    }
   });
 });

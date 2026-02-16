@@ -6,16 +6,10 @@ import {
   sampleJobs,
   type MockJob,
 } from "../helpers/mockDb.js";
+import { stageEnum } from "../../db/schema.js";
 
-// Define schemas for validation tests (same as in controller)
-const stageValues = [
-  "wishlist",
-  "applied",
-  "phone_screen",
-  "interview",
-  "offer",
-  "rejected",
-] as const;
+// Use enum values from schema (single source of truth)
+const stageValues = stageEnum.enumValues;
 
 const createJobSchema = z.object({
   company: z.string().min(1).max(255),
@@ -31,6 +25,10 @@ const createJobSchema = z.object({
 
 const stageSchema = z.enum(stageValues);
 const urlSchema = z.string().url().optional().or(z.literal(""));
+const updateStageSchema = z.object({
+  stage: z.enum(stageValues),
+  order: z.number().int().min(0).optional(),
+});
 const reorderSchema = z.object({
   jobs: z.array(
     z.object({
@@ -313,6 +311,53 @@ describe("Jobs Controller Unit Tests", () => {
 
       const resolvedOrder = newOrder ?? 0;
       assert.strictEqual(resolvedOrder, 0);
+    });
+  });
+
+  describe("Stage Update Validation", () => {
+    it("should accept valid stage and order", () => {
+      const result = updateStageSchema.safeParse({ stage: "applied", order: 3 });
+      assert.strictEqual(result.success, true);
+    });
+
+    it("should accept stage without order (optional)", () => {
+      const result = updateStageSchema.safeParse({ stage: "interview" });
+      assert.strictEqual(result.success, true);
+    });
+
+    it("should reject missing stage", () => {
+      const result = updateStageSchema.safeParse({ order: 0 });
+      assert.strictEqual(result.success, false);
+    });
+
+    it("should reject invalid stage value", () => {
+      const result = updateStageSchema.safeParse({ stage: "promoted" });
+      assert.strictEqual(result.success, false);
+    });
+
+    it("should reject negative order", () => {
+      const result = updateStageSchema.safeParse({ stage: "applied", order: -1 });
+      assert.strictEqual(result.success, false);
+    });
+
+    it("should reject float order", () => {
+      const result = updateStageSchema.safeParse({ stage: "applied", order: 1.5 });
+      assert.strictEqual(result.success, false);
+    });
+
+    it("should reject string order", () => {
+      const result = updateStageSchema.safeParse({ stage: "applied", order: "hello" });
+      assert.strictEqual(result.success, false);
+    });
+
+    it("should accept order of 0", () => {
+      const result = updateStageSchema.safeParse({ stage: "wishlist", order: 0 });
+      assert.strictEqual(result.success, true);
+    });
+
+    it("should accept large order values", () => {
+      const result = updateStageSchema.safeParse({ stage: "wishlist", order: 9999 });
+      assert.strictEqual(result.success, true);
     });
   });
 });
