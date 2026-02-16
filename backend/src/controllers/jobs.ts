@@ -3,20 +3,14 @@ import { eq, asc, and } from "drizzle-orm";
 import {
   db,
   jobApplications,
+  stageEnum,
   type Stage,
   type NewJobApplication,
 } from "../db/index.js";
 import { z } from "zod";
 import { AppError } from "../middleware/errorHandler.js";
 
-const stageValues = [
-  "wishlist",
-  "applied",
-  "phone_screen",
-  "interview",
-  "offer",
-  "rejected",
-] as const;
+const stageValues = stageEnum.enumValues;
 
 const createJobSchema = z.object({
   company: z.string().min(1).max(255),

@@ -7,6 +7,8 @@ import {
   users,
   refreshTokens,
   userProfiles,
+  professionEnum,
+  experienceLevelEnum,
   type NewUser,
   type NewRefreshToken,
   type NewUserProfile,
@@ -383,30 +385,12 @@ export async function getProfile(req: Request, res: Response) {
   });
 }
 
-const professionValues = [
-  "engineering",
-  "product",
-  "design",
-  "marketing",
-  "sales",
-  "operations",
-  "hr",
-  "finance",
-  "other",
-] as const;
-
-const experienceLevelValues = [
-  "entry",
-  "junior",
-  "mid",
-  "senior",
-  "lead",
-  "executive",
-] as const;
-
 const updateProfileSchema = z.object({
-  profession: z.enum(professionValues).nullable().optional(),
-  experienceLevel: z.enum(experienceLevelValues).nullable().optional(),
+  profession: z.enum(professionEnum.enumValues).nullable().optional(),
+  experienceLevel: z
+    .enum(experienceLevelEnum.enumValues)
+    .nullable()
+    .optional(),
   preferredLocation: z.string().max(255).nullable().optional(),
   onboardingCompleted: z.boolean().optional(),
 });
@@ -446,12 +430,13 @@ export async function updateProfile(req: Request, res: Response) {
 
   if (!profile) {
     // Create profile if it doesn't exist
+    // Only set fields that were explicitly provided
     const newProfile: NewUserProfile = {
       userId: user.id,
-      profession: profession ?? null,
-      experienceLevel: experienceLevel ?? null,
-      preferredLocation: preferredLocation ?? user.country ?? null,
+      preferredLocation: preferredLocation !== undefined ? preferredLocation : (user.country || null),
       onboardingCompleted: onboardingCompleted ?? false,
+      ...(profession !== undefined && { profession }),
+      ...(experienceLevel !== undefined && { experienceLevel }),
     };
     [profile] = await db.insert(userProfiles).values(newProfile).returning();
   } else {
