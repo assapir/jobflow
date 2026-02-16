@@ -15,6 +15,13 @@
       "when": 1771243035507,
       "tag": "0001_third_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771243314234,
+      "tag": "0002_purple_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

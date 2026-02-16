@@ -1,0 +1,1 @@
+CREATE INDEX "idx_job_applications_user_stage_order" ON "job_applications" USING btree ("user_id","stage","order");
