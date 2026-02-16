@@ -1,5 +1,5 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:22-alpine AS production
+FROM node:24-alpine AS production
 
 # Install Chromium and dependencies for Playwright on Alpine
 # Using system Chromium instead of Playwright-managed browser

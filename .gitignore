@@ -40,3 +40,6 @@ test-results/
 
 # Playwright auth state
 e2e/.auth/
+
+# Worktrees
+.worktrees/
