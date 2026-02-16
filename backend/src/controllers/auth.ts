@@ -386,12 +386,9 @@ export async function getProfile(req: Request, res: Response) {
 }
 
 const updateProfileSchema = z.object({
-  profession: z.enum(professionEnum.enumValues).nullable().optional(),
-  experienceLevel: z
-    .enum(experienceLevelEnum.enumValues)
-    .nullable()
-    .optional(),
-  preferredLocation: z.string().max(255).nullable().optional(),
+  profession: z.enum(professionEnum.enumValues).nullish(),
+  experienceLevel: z.enum(experienceLevelEnum.enumValues).nullish(),
+  preferredLocation: z.string().max(255).nullish(),
   onboardingCompleted: z.boolean().optional(),
 });
 
