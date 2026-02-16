@@ -169,14 +169,21 @@ export async function deleteJob(req: Request, res: Response) {
   res.json({ message: "Job deleted successfully" });
 }
 
+const updateStageSchema = z.object({
+  stage: z.enum(stageValues),
+  order: z.number().int().min(0).optional(),
+});
+
 export async function updateJobStage(req: Request, res: Response) {
   const { id } = req.params;
   const userId = req.user!.sub;
-  const { stage, order } = req.body;
 
-  if (!stageValues.includes(stage)) {
-    throw new AppError(400, "Invalid stage");
+  const validation = updateStageSchema.safeParse(req.body);
+  if (!validation.success) {
+    throw new AppError(400, "Validation failed");
   }
+
+  const { stage, order } = validation.data;
 
   const [job] = await db
     .update(jobApplications)
