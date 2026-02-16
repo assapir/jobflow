@@ -3,20 +3,14 @@ import { eq, asc, and } from "drizzle-orm";
 import {
   db,
   jobApplications,
+  stageEnum,
   type Stage,
   type NewJobApplication,
 } from "../db/index.js";
 import { z } from "zod";
 import { AppError } from "../middleware/errorHandler.js";
 
-const stageValues = [
-  "wishlist",
-  "applied",
-  "phone_screen",
-  "interview",
-  "offer",
-  "rejected",
-] as const;
+const stageValues = stageEnum.enumValues;
 
 const createJobSchema = z.object({
   company: z.string().min(1).max(255),
@@ -169,14 +163,21 @@ export async function deleteJob(req: Request, res: Response) {
   res.json({ message: "Job deleted successfully" });
 }
 
+const updateStageSchema = z.object({
+  stage: z.enum(stageValues),
+  order: z.number().int().min(0).optional(),
+});
+
 export async function updateJobStage(req: Request, res: Response) {
   const { id } = req.params;
   const userId = req.user!.sub;
-  const { stage, order } = req.body;
 
-  if (!stageValues.includes(stage)) {
-    throw new AppError(400, "Invalid stage");
+  const validation = updateStageSchema.safeParse(req.body);
+  if (!validation.success) {
+    throw new AppError(400, "Validation failed");
   }
+
+  const { stage, order } = validation.data;
 
   const [job] = await db
     .update(jobApplications)
@@ -205,27 +206,30 @@ export async function reorderJobs(req: Request, res: Response) {
 
   const { jobs } = validation.data;
 
-  // Update all jobs in the batch (only user's own jobs)
-  const updates = jobs.map(async (job) => {
-    return db
-      .update(jobApplications)
-      .set({
-        stage: job.stage as Stage,
-        order: job.order,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(eq(jobApplications.id, job.id), eq(jobApplications.userId, userId))
-      );
+  // Update all jobs in a transaction to prevent partial reorders
+  const updatedJobs = await db.transaction(async (tx) => {
+    for (const job of jobs) {
+      await tx
+        .update(jobApplications)
+        .set({
+          stage: job.stage as Stage,
+          order: job.order,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(jobApplications.id, job.id),
+            eq(jobApplications.userId, userId)
+          )
+        );
+    }
+
+    return tx
+      .select()
+      .from(jobApplications)
+      .where(eq(jobApplications.userId, userId))
+      .orderBy(asc(jobApplications.order));
   });
 
-  await Promise.all(updates);
-
-  // Return updated jobs (only user's)
-  const updatedJobs = await db
-    .select()
-    .from(jobApplications)
-    .where(eq(jobApplications.userId, userId))
-    .orderBy(asc(jobApplications.order));
   res.json(updatedJobs);
 }

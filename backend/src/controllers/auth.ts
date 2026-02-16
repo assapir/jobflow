@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import {
   db,
   users,
   refreshTokens,
   userProfiles,
+  professionEnum,
+  experienceLevelEnum,
   type NewUser,
   type NewRefreshToken,
   type NewUserProfile,
-  type Profession,
-  type ExperienceLevel,
 } from "../db/index.js";
 import {
   getAuthorizationUrl,
@@ -384,6 +385,13 @@ export async function getProfile(req: Request, res: Response) {
   });
 }
 
+const updateProfileSchema = z.object({
+  profession: z.enum(professionEnum.enumValues).nullish(),
+  experienceLevel: z.enum(experienceLevelEnum.enumValues).nullish(),
+  preferredLocation: z.string().max(255).nullish(),
+  onboardingCompleted: z.boolean().optional(),
+});
+
 /**
  * Update user profile
  * PATCH /api/auth/profile
@@ -393,12 +401,13 @@ export async function updateProfile(req: Request, res: Response) {
     throw new AppError(401, "Not authenticated");
   }
 
-  const {
-    profession,
-    experienceLevel,
-    preferredLocation,
-    onboardingCompleted,
-  } = req.body;
+  const validation = updateProfileSchema.safeParse(req.body);
+  if (!validation.success) {
+    throw new AppError(400, "Validation failed");
+  }
+
+  const { profession, experienceLevel, preferredLocation, onboardingCompleted } =
+    validation.data;
 
   // Find user
   const [user] = await db
@@ -418,12 +427,13 @@ export async function updateProfile(req: Request, res: Response) {
 
   if (!profile) {
     // Create profile if it doesn't exist
+    // Only set fields that were explicitly provided
     const newProfile: NewUserProfile = {
       userId: user.id,
-      profession: profession as Profession | undefined,
-      experienceLevel: experienceLevel as ExperienceLevel | undefined,
-      preferredLocation: preferredLocation || user.country || null,
+      preferredLocation: preferredLocation !== undefined ? preferredLocation : (user.country || null),
       onboardingCompleted: onboardingCompleted ?? false,
+      ...(profession !== undefined && { profession }),
+      ...(experienceLevel !== undefined && { experienceLevel }),
     };
     [profile] = await db.insert(userProfiles).values(newProfile).returning();
   } else {
@@ -433,10 +443,10 @@ export async function updateProfile(req: Request, res: Response) {
     };
 
     if (profession !== undefined) {
-      updateData.profession = profession as Profession | null;
+      updateData.profession = profession;
     }
     if (experienceLevel !== undefined) {
-      updateData.experienceLevel = experienceLevel as ExperienceLevel | null;
+      updateData.experienceLevel = experienceLevel;
     }
     if (preferredLocation !== undefined) {
       updateData.preferredLocation = preferredLocation;
