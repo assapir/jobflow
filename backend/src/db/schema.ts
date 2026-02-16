@@ -7,6 +7,7 @@ import {
   integer,
   timestamp,
   boolean,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const stageEnum = pgEnum("stage", [
@@ -93,22 +94,32 @@ export const refreshTokens = pgTable("refresh_tokens", {
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 export type NewRefreshToken = typeof refreshTokens.$inferInsert;
 
-export const jobApplications = pgTable("job_applications", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  company: varchar("company", { length: 255 }).notNull(),
-  position: varchar("position", { length: 255 }).notNull(),
-  location: varchar("location", { length: 255 }),
-  salary: varchar("salary", { length: 100 }),
-  linkedinUrl: text("linkedin_url"),
-  description: text("description"),
-  stage: stageEnum("stage").default("wishlist").notNull(),
-  order: integer("order").default(0).notNull(),
-  notes: text("notes"),
-  appliedAt: timestamp("applied_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const jobApplications = pgTable(
+  "job_applications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    company: varchar("company", { length: 255 }).notNull(),
+    position: varchar("position", { length: 255 }).notNull(),
+    location: varchar("location", { length: 255 }),
+    salary: varchar("salary", { length: 100 }),
+    linkedinUrl: text("linkedin_url"),
+    description: text("description"),
+    stage: stageEnum("stage").default("wishlist").notNull(),
+    order: integer("order").default(0).notNull(),
+    notes: text("notes"),
+    appliedAt: timestamp("applied_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_job_applications_user_stage_order").on(
+      table.userId,
+      table.stage,
+      table.order
+    ),
+  ]
+);
 
 export type JobApplication = typeof jobApplications.$inferSelect;
 export type NewJobApplication = typeof jobApplications.$inferInsert;
