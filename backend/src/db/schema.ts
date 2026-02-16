@@ -94,6 +94,15 @@ export const refreshTokens = pgTable("refresh_tokens", {
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 export type NewRefreshToken = typeof refreshTokens.$inferInsert;
 
+// OAuth states for CSRF protection during LinkedIn login
+export const oauthStates = pgTable("oauth_states", {
+  state: varchar("state", { length: 64 }).primaryKey(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export type OAuthState = typeof oauthStates.$inferSelect;
+export type NewOAuthState = typeof oauthStates.$inferInsert;
+
 export const jobApplications = pgTable(
   "job_applications",
   {
