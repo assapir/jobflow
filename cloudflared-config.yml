@@ -1,0 +1,7 @@
+tunnel: 9ab5474d-ff18-4e71-a18b-8c8401480cfb
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: jobflow.sapir.io
+    service: http://caddy:80
+  - service: http_status:404

@@ -20,7 +20,7 @@ A modern job search management application with a Trello-style kanban board to t
 | Frontend | React 19, Vite 6, Mantine v7, @hello-pangea/dnd      |
 | Backend  | Node.js, Express 5, TypeScript, Drizzle ORM, Zod     |
 | Database | PostgreSQL 16                                        |
-| Infra    | Docker, Caddy (HTTPS), GitHub Actions                |
+| Infra    | Docker, Caddy, Cloudflare Tunnel, GitHub Actions     |
 
 ## Quick Start
 

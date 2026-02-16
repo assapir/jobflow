@@ -5,30 +5,35 @@ JobFlow is designed to be self-hosted on a Raspberry Pi (or any Linux server) us
 ## Architecture
 
 ```
-Internet → Router (80/443) → Server (Caddy) → Docker containers
-                                    │
-                   ┌────────────────┼────────────────┐
-                   │                │                │
-               Frontend         Backend         PostgreSQL
-              (static)         (Express)          (DB)
+Internet → Cloudflare (HTTPS) → Tunnel → cloudflared → Caddy → Docker containers
+                                                          │
+                                         ┌────────────────┼────────────────┐
+                                         │                │                │
+                                     Frontend         Backend         PostgreSQL
+                                    (static)         (Express)          (DB)
 ```
+
+No open ports on the server or router. The Cloudflare Tunnel creates an outbound-only connection from the server to Cloudflare's edge network.
 
 ## Stack
 
-| Component     | Technology                                |
-| ------------- | ----------------------------------------- |
-| Reverse Proxy | Caddy (automatic HTTPS via Let's Encrypt) |
-| Backend       | Node.js 22 on Alpine Linux                |
-| Database      | PostgreSQL 16                             |
-| Frontend      | Static files served by Caddy              |
-| CI/CD         | GitHub Actions                            |
+| Component     | Technology                                     |
+| ------------- | ---------------------------------------------- |
+| Ingress       | Cloudflare Tunnel (HTTPS, no open ports)       |
+| Reverse Proxy | Caddy (HTTP internally, TLS handled by Tunnel) |
+| Backend       | Node.js 22 on Alpine Linux                     |
+| Database      | PostgreSQL 16                                  |
+| Frontend      | Static files served by Caddy                   |
+| CI/CD         | GitHub Actions                                 |
 
 ## Deployment Files
 
 | File                           | Purpose                                             |
 | ------------------------------ | --------------------------------------------------- |
 | `docker-compose.prod.yml`      | Production container orchestration                  |
-| `Caddyfile`                    | HTTPS reverse proxy configuration                   |
+| `Caddyfile`                    | HTTP reverse proxy configuration (internal)         |
+| `cloudflared-config.yml`       | Cloudflare Tunnel routing configuration             |
+| `cloudflared-credentials.json` | Tunnel credentials (not in git, see setup below)    |
 | `backend/Dockerfile`           | Backend image with Playwright for LinkedIn scraping |
 | `frontend/Dockerfile`          | Frontend static build                               |
 | `.github/workflows/deploy.yml` | CI/CD pipeline                                      |
@@ -64,15 +69,31 @@ openssl rand -base64 64  # For JWT_SECRET
 openssl rand -base64 64  # For REFRESH_TOKEN_SECRET
 ```
 
-### 4. Configure DNS
+### 4. Set up Cloudflare Tunnel
 
-Add an A record pointing your domain to your server's IP.
+No open ports or port forwarding required. The tunnel connects outbound to Cloudflare.
 
-### 5. Configure router
+```bash
+# Install cloudflared
+# Arch: yay -S cloudflared
+# Or: curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -o /usr/local/bin/cloudflared && chmod +x /usr/local/bin/cloudflared
 
-Forward ports 80 and 443 to your server.
+# Authenticate with Cloudflare
+cloudflared tunnel login
 
-### 6. Start the application
+# Create the tunnel
+cloudflared tunnel create jobflow
+
+# Route DNS (replace with your domain)
+cloudflared tunnel route dns --overwrite-dns jobflow jobflow.yourdomain.com
+
+# Copy credentials to the project directory
+cp ~/.cloudflared/<TUNNEL_ID>.json /opt/jobflow/cloudflared-credentials.json
+```
+
+Update the tunnel ID in `cloudflared-config.yml` to match your tunnel.
+
+### 5. Start the application
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d

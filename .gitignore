@@ -28,6 +28,9 @@ coverage/
 # Drizzle
 drizzle/*.sql
 
+# Cloudflare Tunnel credentials
+cloudflared-credentials.json
+
 # Crawlee storage
 storage/
 tsconfig.tsbuildinfo
