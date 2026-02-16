@@ -19,7 +19,7 @@ A modern job search management application with a Trello-style kanban board to t
 | -------- | ---------------------------------------------------- |
 | Frontend | React 19, Vite 6, Mantine v7, @hello-pangea/dnd      |
 | Backend  | Node.js, Express 5, TypeScript, Drizzle ORM, Zod     |
-| Database | PostgreSQL 16                                        |
+| Database | PostgreSQL 17                                        |
 | Infra    | Docker, Caddy, Cloudflare Tunnel, GitHub Actions     |
 
 ## Quick Start
@@ -69,8 +69,16 @@ cd backend && npm run lint
 | PATCH  | `/api/jobs/:id/stage` | Update job stage           |
 | PATCH  | `/api/jobs/reorder`   | Reorder jobs (drag-drop)   |
 | GET    | `/api/linkedin/search`| Search LinkedIn jobs       |
-| GET    | `/api/health`         | Health check               |
-| GET    | `/api/metrics`        | System metrics             |
+| GET    | `/api/auth/status`    | Auth configuration status  |
+| GET    | `/api/auth/linkedin`  | Initiate LinkedIn OAuth    |
+| GET    | `/api/auth/linkedin/callback` | OAuth callback       |
+| POST   | `/api/auth/refresh`   | Refresh access token       |
+| GET    | `/api/auth/me`        | Get current user           |
+| POST   | `/api/auth/logout`    | Logout                     |
+| GET    | `/api/auth/profile`   | Get user profile           |
+| PATCH  | `/api/auth/profile`   | Update user profile        |
+| GET    | `/api/health`         | Health check (public)      |
+| GET    | `/api/metrics`        | System metrics (auth required) |
 
 ## License
 
