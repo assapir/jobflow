@@ -1,13 +1,24 @@
 services:
+  # Cloudflare Tunnel — secure ingress, no open ports needed
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: jobflow-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    volumes:
+      - ./cloudflared-config.yml:/etc/cloudflared/config.yml:ro
+      - ./cloudflared-credentials.json:/etc/cloudflared/credentials.json:ro
+    depends_on:
+      caddy:
+        condition: service_started
+    networks:
+      - jobflow-network
+
   # Caddy reverse proxy with automatic HTTPS
   caddy:
     image: caddy:2-alpine
     container_name: jobflow-caddy
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"  # HTTP/3 support
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - frontend_build:/srv/frontend:ro
